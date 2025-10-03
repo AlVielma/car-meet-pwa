@@ -1,0 +1,7 @@
+{
+  "name": "Car-meet pwa",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
