@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8"/>
-  <title>Ionic App</title>
+  <title>Car Meet PWA</title>
 
   <base href="/"/>
 
@@ -17,12 +17,72 @@
   <!-- add to homescreen for ios -->
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
-  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#1877f2"/>
+  <link rel="manifest" href="manifest.webmanifest">  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* This CSS is used to hide the splash screen when the app is ready */
+    .splash-screen {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      background-color: #1877f2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      flex-direction: column;
+    }
+    
+    .splash-screen.hidden {
+      display: none;
+    }
+    
+    .splash-screen img {
+      width: 100px;
+      height: 100px;
+      margin-bottom: 20px;
+    }
+    
+    .splash-screen .loading-text {
+      color: white;
+      font-size: 18px;
+      font-weight: 500;
+    }
+    
+    .splash-screen .car-icon {
+      font-size: 48px;
+      color: white;
+      margin-bottom: 20px;
+    }
+  </style>
 </head>
 
 <body>
+  <div class="splash-screen" id="splash-screen">
+    <i class="fas fa-car car-icon"></i>
+    <img src="assets/icon/favicon.png" alt="Car Meet PWA">
+    <div class="loading-text">Car Meet PWA</div>
+  </div>
+  
   <app-root></app-root>
   <noscript>Please enable JavaScript to continue using this application.</noscript>
+  
+  <script>
+    // Hide splash screen when app is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function() {
+        const splashScreen = document.getElementById('splash-screen');
+        if (splashScreen) {
+          splashScreen.classList.add('hidden');
+        }
+      }, 2000);
+    });
+  </script>
 </body>
 
 </html>

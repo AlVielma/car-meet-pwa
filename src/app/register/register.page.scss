@@ -1,0 +1,140 @@
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+  padding: 20px 0;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.text-center {
+  text-align: center;
+}
+
+ion-card-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--ion-color-primary);
+  margin-bottom: 8px;
+  
+  i {
+    margin-right: 8px;
+    color: var(--ion-color-primary);
+  }
+}
+
+ion-item {
+  --background: transparent;
+  --border-color: #e0e0e0;
+  --border-radius: 8px;
+  --padding-start: 0;
+  --padding-end: 0;
+  margin-bottom: 16px;
+  
+  ion-label {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 8px;
+  }
+  
+  ion-input {
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: #f8f9fa;
+    
+    &:focus {
+      border-color: var(--ion-color-primary);
+      background: white;
+    }
+  }
+}
+
+ion-text[color="danger"] {
+  margin-top: -8px;
+  margin-bottom: 16px;
+  display: block;
+  
+  small {
+    font-size: 0.875rem;
+  }
+}
+
+.register-button {
+  --background: var(--ion-color-primary);
+  --background-hover: var(--ion-color-primary-shade);
+  --color: white;
+  --border-radius: 8px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  margin-top: 24px;
+  font-weight: 600;
+  font-size: 1rem;
+  
+  &:disabled {
+    --background: #ccc;
+    --color: #666;
+  }
+  
+  i {
+    margin-right: 8px;
+  }
+}
+
+.login-link {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+  
+  .login-link-text {
+    color: var(--ion-color-primary);
+    text-decoration: none;
+    font-weight: 500;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .register-container {
+    padding: 10px;
+  }
+  
+  .register-card {
+    margin: 0;
+    border-radius: 12px;
+  }
+  
+  ion-card-title {
+    font-size: 1.25rem;
+  }
+}
+
+// Animaciones
+ion-card {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

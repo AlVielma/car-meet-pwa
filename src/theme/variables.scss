@@ -1,2 +1,126 @@
 // For information on how to create your own theme, please see:
 // http://ionicframework.com/docs/theming/
+
+// Car Meet PWA Theme - Facebook Blue Colors
+:root {
+  // Facebook Blue Color Palette
+  --ion-color-primary: #1877f2;
+  --ion-color-primary-rgb: 24, 119, 242;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #1569d4;
+  --ion-color-primary-tint: #2f85f3;
+
+  // Secondary colors
+  --ion-color-secondary: #42a5f5;
+  --ion-color-secondary-rgb: 66, 165, 245;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #3a92d8;
+  --ion-color-secondary-tint: #55aef6;
+
+  // Tertiary colors
+  --ion-color-tertiary: #64b5f6;
+  --ion-color-tertiary-rgb: 100, 181, 246;
+  --ion-color-tertiary-contrast: #000000;
+  --ion-color-tertiary-contrast-rgb: 0, 0, 0;
+  --ion-color-tertiary-shade: #589fd8;
+  --ion-color-tertiary-tint: #74bdf7;
+
+  // Success color
+  --ion-color-success: #4caf50;
+  --ion-color-success-rgb: 76, 175, 80;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #439a46;
+  --ion-color-success-tint: #5eb562;
+
+  // Warning color
+  --ion-color-warning: #ff9800;
+  --ion-color-warning-rgb: 255, 152, 0;
+  --ion-color-warning-contrast: #000000;
+  --ion-color-warning-contrast-rgb: 0, 0, 0;
+  --ion-color-warning-shade: #e08600;
+  --ion-color-warning-tint: #ffa21a;
+
+  // Danger color
+  --ion-color-danger: #f44336;
+  --ion-color-danger-rgb: 244, 67, 54;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #d73a2f;
+  --ion-color-danger-tint: #f55647;
+
+  // Light color
+  --ion-color-light: #f8f9fa;
+  --ion-color-light-rgb: 248, 249, 250;
+  --ion-color-light-contrast: #000000;
+  --ion-color-light-contrast-rgb: 0, 0, 0;
+  --ion-color-light-shade: #dadbdc;
+  --ion-color-light-tint: #f9fafb;
+
+  // Medium color
+  --ion-color-medium: #6c757d;
+  --ion-color-medium-rgb: 108, 117, 125;
+  --ion-color-medium-contrast: #ffffff;
+  --ion-color-medium-contrast-rgb: 255, 255, 255;
+  --ion-color-medium-shade: #5f666e;
+  --ion-color-medium-tint: #7b828a;
+
+  // Dark color
+  --ion-color-dark: #343a40;
+  --ion-color-dark-rgb: 52, 58, 64;
+  --ion-color-dark-contrast: #ffffff;
+  --ion-color-dark-contrast-rgb: 255, 255, 255;
+  --ion-color-dark-shade: #2e3338;
+  --ion-color-dark-tint: #484e53;
+
+  // Background colors
+  --ion-background-color: #ffffff;
+  --ion-background-color-rgb: 255, 255, 255;
+  --ion-text-color: #000000;
+  --ion-text-color-rgb: 0, 0, 0;
+
+  // Toolbar colors
+  --ion-toolbar-background: var(--ion-color-primary);
+  --ion-toolbar-color: var(--ion-color-primary-contrast);
+
+  // Card colors
+  --ion-card-background: #ffffff;
+  --ion-card-color: #000000;
+
+  // Item colors
+  --ion-item-background: #ffffff;
+  --ion-item-color: #000000;
+  --ion-item-border-color: #e0e0e0;
+
+  // Input colors
+  --ion-input-background: #f8f9fa;
+  --ion-input-color: #000000;
+  --ion-input-border-color: #e0e0e0;
+
+  // Button colors
+  --ion-button-background: var(--ion-color-primary);
+  --ion-button-color: var(--ion-color-primary-contrast);
+}
+
+// Dark theme overrides
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ion-background-color: #1a1a1a;
+    --ion-background-color-rgb: 26, 26, 26;
+    --ion-text-color: #ffffff;
+    --ion-text-color-rgb: 255, 255, 255;
+
+    --ion-card-background: #2d2d2d;
+    --ion-card-color: #ffffff;
+
+    --ion-item-background: #2d2d2d;
+    --ion-item-color: #ffffff;
+    --ion-item-border-color: #404040;
+
+    --ion-input-background: #404040;
+    --ion-input-color: #ffffff;
+    --ion-input-border-color: #555555;
+  }
+}

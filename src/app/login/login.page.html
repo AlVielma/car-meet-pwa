@@ -1,0 +1,76 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>
+      <i class="fas fa-car"></i> Car Meet - Iniciar Sesión
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="login-container">
+    <ion-card class="login-card">
+      <ion-card-header>
+        <ion-card-title class="text-center">
+          <i class="fas fa-sign-in-alt"></i>
+          Iniciar Sesión
+        </ion-card-title>
+      </ion-card-header>
+      
+      <ion-card-content>
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <!-- Email -->
+          <ion-item>
+            <ion-label position="stacked">Email *</ion-label>
+            <ion-input 
+              type="email" 
+              formControlName="email"
+              placeholder="tu@email.com"
+              [class.ion-invalid]="email?.invalid && email?.touched">
+            </ion-input>
+          </ion-item>
+          <ion-text color="danger" *ngIf="email?.invalid && email?.touched">
+            <small *ngIf="email?.errors?.['required']">El email es requerido</small>
+            <small *ngIf="email?.errors?.['email']">Ingresa un email válido</small>
+          </ion-text>
+
+          <!-- Contraseña -->
+          <ion-item>
+            <ion-label position="stacked">Contraseña *</ion-label>
+            <ion-input 
+              type="password" 
+              formControlName="password"
+              placeholder="Tu contraseña"
+              [class.ion-invalid]="password?.invalid && password?.touched">
+            </ion-input>
+          </ion-item>
+          <ion-text color="danger" *ngIf="password?.invalid && password?.touched">
+            <small *ngIf="password?.errors?.['required']">La contraseña es requerida</small>
+            <small *ngIf="password?.errors?.['minlength']">La contraseña debe tener al menos 6 caracteres</small>
+          </ion-text>
+
+          <!-- Botón de Login -->
+          <ion-button 
+            expand="block" 
+            type="submit" 
+            [disabled]="loginForm.invalid || isLoading"
+            class="login-button">
+            <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+            <span *ngIf="!isLoading">
+              <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+            </span>
+          </ion-button>
+        </form>
+
+        <!-- Enlace a Registro -->
+        <div class="text-center register-link">
+          <ion-text>
+            ¿No tienes una cuenta? 
+            <a href="#" (click)="goToRegister()" class="register-link-text">
+              Regístrate aquí
+            </a>
+          </ion-text>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
