@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { RegisterRequest, LoginRequest, ApiResponse, User, LoginResponse } from '../interfaces/auth.interface';
+import { RegisterRequest, LoginRequest, VerifyCodeRequest, ResendCodeRequest, ApiResponse, User, LoginResponse, VerificationCodeResponse } from '../interfaces/auth.interface';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -41,8 +41,18 @@ export class AuthService {
   /**
    * Inicia sesión con email y contraseña
    */
-  login(credentials: LoginRequest): Observable<ApiResponse<LoginResponse>> {
-    return this.http.post<ApiResponse<LoginResponse>>(`${this.API_URL}/auth/login`, credentials)
+  login(credentials: LoginRequest): Observable<ApiResponse<VerificationCodeResponse>> {
+    return this.http.post<ApiResponse<VerificationCodeResponse>>(`${this.API_URL}/auth/login`, credentials)
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
+  /**
+   * Verifica el código de 2 pasos
+   */
+  verifyCode(verifyData: VerifyCodeRequest): Observable<ApiResponse<LoginResponse>> {
+    return this.http.post<ApiResponse<LoginResponse>>(`${this.API_URL}/auth/verify-code`, verifyData)
       .pipe(
         tap(response => {
           if (response.success && response.data) {
@@ -53,6 +63,17 @@ export class AuthService {
             this.currentUserSubject.next(response.data.user);
           }
         }),
+        catchError(this.handleError)
+      );
+  }
+
+  /**
+   * Reenvía el código de verificación
+   */
+  resendCode(email: string): Observable<ApiResponse<VerificationCodeResponse>> {
+    const requestData: ResendCodeRequest = { email };
+    return this.http.post<ApiResponse<VerificationCodeResponse>>(`${this.API_URL}/auth/resend-code`, requestData)
+      .pipe(
         catchError(this.handleError)
       );
   }

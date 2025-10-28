@@ -27,6 +27,15 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface VerifyCodeRequest {
+  email: string;
+  code: string;
+}
+
+export interface ResendCodeRequest {
+  email: string;
+}
+
 export interface ApiResponse<T = any> {
   success: boolean;
   message: string;
@@ -40,9 +49,14 @@ export interface LoginResponse {
   expiresIn: number;
 }
 
+export interface VerificationCodeResponse {
+  email: string;
+}
+
 export interface ValidationError {
   type: string;
   msg: string;
   path: string;
   location: string;
+  value?: string;
 }

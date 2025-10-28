@@ -8,7 +8,8 @@
 
 <ion-content [fullscreen]="true" class="ion-padding">
   <div class="login-container">
-    <ion-card class="login-card">
+    <!-- Formulario de Login -->
+    <ion-card class="login-card" *ngIf="!showVerification">
       <ion-card-header>
         <ion-card-title class="text-center">
           <i class="fas fa-sign-in-alt"></i>
@@ -67,6 +68,78 @@
             ¿No tienes una cuenta? 
             <a href="#" (click)="goToRegister()" class="register-link-text">
               Regístrate aquí
+            </a>
+          </ion-text>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Formulario de Verificación de 2 Pasos -->
+    <ion-card class="login-card" *ngIf="showVerification">
+      <ion-card-header>
+        <ion-card-title class="text-center">
+          <i class="fas fa-shield-alt"></i>
+          Verificación de 2 Pasos
+        </ion-card-title>
+      </ion-card-header>
+      
+      <ion-card-content>
+        <div class="verification-info">
+          <ion-text color="medium">
+            <p>Hemos enviado un código de verificación de 6 dígitos a:</p>
+            <p><strong>{{ userEmail }}</strong></p>
+          </ion-text>
+        </div>
+
+        <form [formGroup]="verificationForm" (ngSubmit)="onVerifyCode()">
+          <!-- Código de Verificación -->
+          <ion-item>
+            <ion-label position="stacked">Código de Verificación *</ion-label>
+            <ion-input 
+              type="text" 
+              formControlName="code"
+              placeholder="123456"
+              maxlength="6"
+              [class.ion-invalid]="code?.invalid && code?.touched">
+            </ion-input>
+          </ion-item>
+          <ion-text color="danger" *ngIf="code?.invalid && code?.touched">
+            <small *ngIf="code?.errors?.['required']">El código es requerido</small>
+            <small *ngIf="code?.errors?.['pattern']">El código debe ser de 6 dígitos numéricos</small>
+          </ion-text>
+
+          <!-- Botón de Verificación -->
+          <ion-button 
+            expand="block" 
+            type="submit" 
+            [disabled]="verificationForm.invalid || isLoading"
+            class="login-button">
+            <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+            <span *ngIf="!isLoading">
+              <i class="fas fa-check"></i> Verificar Código
+            </span>
+          </ion-button>
+        </form>
+
+        <!-- Botón de Reenvío -->
+        <div class="resend-section">
+          <ion-button 
+            expand="block" 
+            fill="outline" 
+            [disabled]="resendTimer > 0 || isLoading"
+            (click)="resendCode()"
+            class="resend-button">
+            <i class="fas fa-redo"></i>
+            <span *ngIf="resendTimer === 0">Reenviar Código</span>
+            <span *ngIf="resendTimer > 0">Reenviar en {{ formattedResendTime }}</span>
+          </ion-button>
+        </div>
+
+        <!-- Botón para volver al login -->
+        <div class="text-center back-link">
+          <ion-text>
+            <a href="#" (click)="goBackToLogin()" class="back-link-text">
+              <i class="fas fa-arrow-left"></i> Volver al Login
             </a>
           </ion-text>
         </div>
