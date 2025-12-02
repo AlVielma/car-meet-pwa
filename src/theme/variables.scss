@@ -76,8 +76,8 @@
   --ion-color-dark-tint: #484e53;
 
   // Background colors
-  --ion-background-color: #ffffff;
-  --ion-background-color-rgb: 255, 255, 255;
+  --ion-background-color: #f0f2f5;
+  --ion-background-color-rgb: 240, 242, 245;
   --ion-text-color: #000000;
   --ion-text-color-rgb: 0, 0, 0;
 
@@ -104,23 +104,4 @@
   --ion-button-color: var(--ion-color-primary-contrast);
 }
 
-// Dark theme overrides
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ion-background-color: #1a1a1a;
-    --ion-background-color-rgb: 26, 26, 26;
-    --ion-text-color: #ffffff;
-    --ion-text-color-rgb: 255, 255, 255;
 
-    --ion-card-background: #2d2d2d;
-    --ion-card-color: #ffffff;
-
-    --ion-item-background: #2d2d2d;
-    --ion-item-color: #ffffff;
-    --ion-item-border-color: #404040;
-
-    --ion-input-background: #404040;
-    --ion-input-color: #ffffff;
-    --ion-input-border-color: #555555;
-  }
-}

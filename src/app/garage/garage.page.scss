@@ -1,0 +1,94 @@
+.car-item {
+  margin-bottom: 20px;
+  border: 1px solid var(--ion-color-light);
+  border-radius: 8px;
+  padding: 10px;
+  
+  ion-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+  }
+}
+
+.car-stats {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.car-actions {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--ion-color-light);
+  
+  ion-button {
+    --padding-start: 8px;
+    --padding-end: 8px;
+    
+    i {
+      margin-right: 4px;
+    }
+  }
+}
+
+.participation-item {
+  margin-bottom: 10px;
+  
+  ion-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+  }
+}
+
+.stat-item {
+  text-align: center;
+  
+  h3 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--ion-color-primary);
+    margin: 0;
+  }
+  
+  p {
+    margin: 5px 0 0 0;
+    color: var(--ion-color-medium);
+    font-size: 0.9rem;
+  }
+}
+
+ion-card {
+  margin-bottom: 20px;
+}
+
+ion-card-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  
+  i {
+    margin-right: 8px;
+    color: var(--ion-color-primary);
+  }
+}
+
+ion-badge {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+ion-button {
+  margin-top: 10px;
+  
+  i {
+    margin-right: 8px;
+  }
+}
+
+ion-chip {
+  margin-right: 5px;
+  margin-bottom: 5px;
+}

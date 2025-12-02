@@ -1,0 +1,45 @@
+.event-item {
+  margin-bottom: 10px;
+  
+  ion-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+  }
+}
+
+.participation-item {
+  margin-bottom: 10px;
+  
+  ion-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+  }
+}
+
+ion-card {
+  margin-bottom: 20px;
+}
+
+ion-card-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  
+  i {
+    margin-right: 8px;
+    color: var(--ion-color-primary);
+  }
+}
+
+ion-badge {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+ion-button {
+  margin-top: 10px;
+  
+  i {
+    margin-right: 8px;
+  }
+}

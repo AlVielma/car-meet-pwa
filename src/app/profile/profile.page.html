@@ -1,0 +1,113 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>
+      <i class="fas fa-user"></i> Perfil
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <!-- Información del usuario -->
+  <ion-card>
+    <ion-card-content>
+      <div class="user-info">
+        <ion-avatar class="user-avatar">
+          <img [src]="user.profilePhoto" [alt]="user.firstName + ' ' + user.lastName">
+        </ion-avatar>
+        <div class="user-details">
+          <h2>{{ user.firstName }} {{ user.lastName }}</h2>
+          <p>{{ user.email }}</p>
+          <p>{{ user.phone }}</p>
+          <ion-badge [color]="user.isActive ? 'success' : 'danger'">
+            {{ user.isActive ? 'Activo' : 'Inactivo' }}
+          </ion-badge>
+        </div>
+      </div>
+      <ion-button expand="block" fill="outline" color="primary" (click)="editProfile()">
+        <i class="fas fa-edit"></i>
+        Editar Perfil
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Estadísticas -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <i class="fas fa-chart-bar"></i> Estadísticas
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="3">
+            <div class="stat-item">
+              <h3>{{ user.totalEvents }}</h3>
+              <p>Eventos</p>
+            </div>
+          </ion-col>
+          <ion-col size="3">
+            <div class="stat-item">
+              <h3>{{ user.totalCars }}</h3>
+              <p>Autos</p>
+            </div>
+          </ion-col>
+          <ion-col size="3">
+            <div class="stat-item">
+              <h3>{{ user.totalVotes }}</h3>
+              <p>Votos</p>
+            </div>
+          </ion-col>
+          <ion-col size="3">
+            <div class="stat-item">
+              <h3>{{ user.totalPhotos }}</h3>
+              <p>Fotos</p>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
+
+
+
+
+  <!-- Actividad reciente -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <i class="fas fa-history"></i> Actividad Reciente
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list>
+        <ion-item *ngFor="let activity of recentActivity">
+          <ion-icon 
+            [name]="getActivityIcon(activity.type)" 
+            slot="start" 
+            [color]="getActivityColor(activity.type)">
+          </ion-icon>
+          <ion-label>
+            <h3>{{ activity.title }}</h3>
+            <p>{{ activity.date }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Acciones -->
+  <ion-card>
+    <ion-card-content>
+      <ion-button expand="block" fill="outline" color="medium">
+        <i class="fas fa-question-circle"></i>
+        Ayuda y Soporte
+      </ion-button>
+      <ion-button expand="block" fill="outline" color="danger" (click)="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+        Cerrar Sesión
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

@@ -1,0 +1,135 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>
+      <i class="fas fa-car"></i> Mi Garage
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <!-- Agregar nuevo auto -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <i class="fas fa-plus-circle"></i> Agregar Auto
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-button expand="block" fill="solid" color="primary">
+        <i class="fas fa-plus"></i>
+        Nuevo Auto
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Mis autos -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <i class="fas fa-list"></i> Mis Autos ({{ myCars.length }})
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div *ngFor="let car of myCars" class="car-item">
+        <ion-item>
+          <ion-icon name="car" slot="start" color="primary"></ion-icon>
+          <ion-label>
+            <h2>{{ car.brand }} {{ car.model }}</h2>
+            <p>{{ car.year }} • {{ car.color }}</p>
+            <p>{{ car.licensePlate }}</p>
+            <p>{{ car.description }}</p>
+            <div class="car-stats">
+              <ion-chip color="primary" size="small">
+                <ion-icon name="camera"></ion-icon>
+                {{ car.photos }} fotos
+              </ion-chip>
+              <ion-chip color="secondary" size="small">
+                <ion-icon name="calendar"></ion-icon>
+                {{ car.participations }} eventos
+              </ion-chip>
+              <ion-chip color="tertiary" size="small">
+                <ion-icon name="star"></ion-icon>
+                {{ car.votes }} votos
+              </ion-chip>
+            </div>
+          </ion-label>
+          <ion-badge *ngIf="car.isMain" color="warning" slot="end">
+            Principal
+          </ion-badge>
+        </ion-item>
+        
+        <div class="car-actions">
+          <ion-button fill="clear" size="small" color="primary">
+            <i class="fas fa-edit"></i>
+            Editar
+          </ion-button>
+          <ion-button fill="clear" size="small" color="secondary">
+            <i class="fas fa-camera"></i>
+            Fotos
+          </ion-button>
+          <ion-button fill="clear" size="small" color="tertiary">
+            <i class="fas fa-cog"></i>
+            Configurar
+          </ion-button>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Participaciones recientes -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <i class="fas fa-history"></i> Participaciones Recientes
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div *ngFor="let participation of recentParticipations" class="participation-item">
+        <ion-item>
+          <ion-icon [name]="getPositionIcon(participation.position)" slot="start" [color]="getPositionColor(participation.position)"></ion-icon>
+          <ion-label>
+            <h2>{{ participation.eventName }}</h2>
+            <p>{{ participation.carName }}</p>
+            <p>{{ participation.date }}</p>
+          </ion-label>
+          <ion-badge [color]="getStatusColor(participation.status)" slot="end">
+            {{ participation.status }}
+          </ion-badge>
+        </ion-item>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Estadísticas -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <i class="fas fa-chart-bar"></i> Estadísticas
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="4">
+            <div class="stat-item">
+              <h3>{{ myCars.length }}</h3>
+              <p>Autos</p>
+            </div>
+          </ion-col>
+          <ion-col size="4">
+            <div class="stat-item">
+              <h3>{{ getTotalParticipations() }}</h3>
+              <p>Eventos</p>
+            </div>
+          </ion-col>
+          <ion-col size="4">
+            <div class="stat-item">
+              <h3>{{ getTotalVotes() }}</h3>
+              <p>Votos</p>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

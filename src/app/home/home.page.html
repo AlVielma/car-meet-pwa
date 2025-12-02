@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
     <ion-title>
-      <i class="fas fa-car"></i> Car Meet PWA
+      <i class="fas fa-home"></i> Inicio
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -22,79 +22,44 @@
       <ion-card-content>
         <div class="welcome-content">
           <p class="welcome-text">
-            Únete a la comunidad más grande de amantes de los autos. 
             Descubre eventos, comparte fotos de tu vehículo y conecta con otros entusiastas.
           </p>
-          
-          <div class="action-buttons">
-            <ion-button 
-              expand="block" 
-              fill="solid" 
-              color="primary"
-              routerLink="/login"
-              class="action-button">
-              <i class="fas fa-sign-in-alt"></i>
-              Iniciar Sesión
-            </ion-button>
-            
-            <ion-button 
-              expand="block" 
-              fill="outline" 
-              color="primary"
-              routerLink="/register"
-              class="action-button">
-              <i class="fas fa-user-plus"></i>
-              Crear Cuenta
-            </ion-button>
-          </div>
         </div>
       </ion-card-content>
     </ion-card>
     
-    <div class="features-section">
-      <h3 class="features-title">
-        <i class="fas fa-star"></i> Características
-      </h3>
-      
-      <ion-grid>
-        <ion-row>
-          <ion-col size="12" size-md="4">
-            <ion-card class="feature-card">
-              <ion-card-content>
-                <div class="feature-icon">
-                  <i class="fas fa-calendar-alt"></i>
-                </div>
-                <h4>Eventos</h4>
-                <p>Descubre y participa en car meets locales</p>
-              </ion-card-content>
-            </ion-card>
-          </ion-col>
-          
-          <ion-col size="12" size-md="4">
-            <ion-card class="feature-card">
-              <ion-card-content>
-                <div class="feature-icon">
-                  <i class="fas fa-camera"></i>
-                </div>
-                <h4>Galería</h4>
-                <p>Comparte fotos de tu vehículo con la comunidad</p>
-              </ion-card-content>
-            </ion-card>
-          </ion-col>
-          
-          <ion-col size="12" size-md="4">
-            <ion-card class="feature-card">
-              <ion-card-content>
-                <div class="feature-icon">
-                  <i class="fas fa-users"></i>
-                </div>
-                <h4>Comunidad</h4>
-                <p>Conecta con otros entusiastas del automóvil</p>
-              </ion-card-content>
-            </ion-card>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </div>
+    <!-- Eventos próximos -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <i class="fas fa-calendar-check"></i> Próximos Eventos
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div *ngFor="let event of upcomingEvents" class="event-item">
+          <ion-item>
+            <ion-icon name="calendar" slot="start" color="primary"></ion-icon>
+            <ion-label>
+              <h2>{{ event.name }}</h2>
+              <p>
+                <ion-icon name="location" size="small"></ion-icon>
+                {{ event.location }}
+              </p>
+              <p>
+                <ion-icon name="time" size="small"></ion-icon>
+                {{ event.date }} a las {{ event.time }}
+              </p>
+              <p>
+                <ion-icon name="people" size="small"></ion-icon>
+                {{ event.participants }} participantes
+              </p>
+            </ion-label>
+            <ion-badge [color]="getStatusColor(event.status)" slot="end">
+              {{ event.status }}
+            </ion-badge>
+          </ion-item>
+        </div>
+      </ion-card-content>
+    </ion-card>
   </div>
 </ion-content>
