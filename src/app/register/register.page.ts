@@ -18,8 +18,12 @@ import {
   IonText,
   IonSpinner,
   AlertController,
-  ToastController
+  ToastController,
+  IonIcon,
+  IonAvatar
 } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { camera } from 'ionicons/icons';
 import { AuthService } from '../services/auth.service';
 import { RegisterRequest } from '../interfaces/auth.interface';
 
@@ -43,6 +47,8 @@ import { RegisterRequest } from '../interfaces/auth.interface';
     IonCardTitle,
     IonText,
     IonSpinner,
+    IonIcon,
+    IonAvatar,
     ReactiveFormsModule,
     CommonModule
   ],
@@ -50,6 +56,8 @@ import { RegisterRequest } from '../interfaces/auth.interface';
 export class RegisterPage implements OnInit {
   registerForm: FormGroup;
   isLoading = false;
+  selectedPhoto: File | null = null;
+  photoPreview: string | null = null;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -59,6 +67,7 @@ export class RegisterPage implements OnInit {
     private toastController: ToastController
   ) {
     this.registerForm = this.createForm();
+    addIcons({ camera });
   }
 
   ngOnInit() {}
@@ -86,14 +95,40 @@ export class RegisterPage implements OnInit {
     return null;
   }
 
+  onPhotoSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedPhoto = file;
+      
+      // Crear preview
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.photoPreview = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
   async onSubmit() {
     if (this.registerForm.valid) {
       this.isLoading = true;
       
-      const formData: RegisterRequest = this.registerForm.value;
-      
       try {
-        console.log(formData);
+        const formData = new FormData();
+        const formValue = this.registerForm.value;
+
+        // Agregar campos del formulario
+        Object.keys(formValue).forEach(key => {
+          if (formValue[key] !== null && formValue[key] !== undefined) {
+            formData.append(key, formValue[key]);
+          }
+        });
+
+        // Agregar foto si existe
+        if (this.selectedPhoto) {
+          formData.append('photo', this.selectedPhoto);
+        }
+
         const response = await this.authService.register(formData).toPromise();
         
         if (response?.success) {

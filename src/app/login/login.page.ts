@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { 
   IonHeader, 
@@ -60,6 +60,7 @@ export class LoginPage implements OnInit {
     private formBuilder: FormBuilder,
     private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     private alertController: AlertController,
     private toastController: ToastController
   ) {
@@ -71,6 +72,29 @@ export class LoginPage implements OnInit {
     if (this.authService.isAuthenticated()) {
       this.router.navigate(['/home']);
     }
+
+    // Verificar si hay mensajes de activación de cuenta
+    this.route.queryParams.subscribe(params => {
+      if (params['status'] && params['message']) {
+        this.showActivationMessage(params['status'], params['message']);
+      }
+    });
+  }
+
+  private async showActivationMessage(status: string, message: string) {
+    const toast = await this.toastController.create({
+      message: decodeURIComponent(message),
+      duration: 5000,
+      color: status === 'success' ? 'success' : 'danger',
+      position: 'top',
+      buttons: [
+        {
+          text: 'OK',
+          role: 'cancel'
+        }
+      ]
+    });
+    await toast.present();
   }
 
   private createLoginForm(): FormGroup {

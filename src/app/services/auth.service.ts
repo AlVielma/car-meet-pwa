@@ -24,7 +24,7 @@ export class AuthService {
   /**
    * Registra un nuevo usuario
    */
-  register(userData: RegisterRequest): Observable<ApiResponse<User>> {
+  register(userData: RegisterRequest | FormData): Observable<ApiResponse<User>> {
     return this.http.post<ApiResponse<User>>(`${this.API_URL}/auth/register`, userData)
       .pipe(
         tap(response => {
