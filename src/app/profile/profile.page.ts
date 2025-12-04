@@ -1,9 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { 
   IonHeader, 
   IonToolbar, 
   IonTitle, 
+  IonButtons,
   IonContent, 
   IonCard, 
   IonCardContent, 
@@ -16,13 +18,21 @@ import {
   IonBadge,
   IonAvatar,
   IonList,
-  IonToggle,
   IonGrid,
   IonRow,
-  IonCol
+  IonCol,
+  IonSpinner,
+  ModalController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { person, settings, notifications, logOut, shield, star, calendar, car, camera, helpCircle } from 'ionicons/icons';
+import { 
+  person, settings, notifications, logOut, shield, star, calendar, car, camera, helpCircle,
+  logOutOutline, carSportOutline, calendarOutline, cameraOutline, personOutline, 
+  shieldCheckmarkOutline, notificationsOutline, helpCircleOutline, alertCircleOutline 
+} from 'ionicons/icons';
+import { AuthService } from '../services/auth.service';
+import { User } from '../interfaces/auth.interface';
+import { EditProfileModalComponent } from './edit-profile-modal/edit-profile-modal.component';
 
 @Component({
   selector: 'app-profile',
@@ -33,6 +43,7 @@ import { person, settings, notifications, logOut, shield, star, calendar, car, c
     IonHeader, 
     IonToolbar, 
     IonTitle, 
+    IonButtons,
     IonContent, 
     IonCard, 
     IonCardContent, 
@@ -47,92 +58,78 @@ import { person, settings, notifications, logOut, shield, star, calendar, car, c
     IonList,
     IonGrid,
     IonRow,
-    IonCol
+    IonCol,
+    IonSpinner
   ],
 })
-export class ProfilePage {
-  constructor() {
-    addIcons({ person, settings, notifications, logOut, shield, star, calendar, car, camera, helpCircle });
+export class ProfilePage implements OnInit {
+  user: User | null = null;
+  isLoading = true;
+
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private modalCtrl: ModalController
+  ) {
+    addIcons({ 
+      person, settings, notifications, logOut, shield, star, calendar, car, camera, helpCircle,
+      'log-out-outline': logOutOutline,
+      'car-sport-outline': carSportOutline,
+      'calendar-outline': calendarOutline,
+      'camera-outline': cameraOutline,
+      'person-outline': personOutline,
+      'shield-checkmark-outline': shieldCheckmarkOutline,
+      'notifications-outline': notificationsOutline,
+      'help-circle-outline': helpCircleOutline,
+      'alert-circle-outline': alertCircleOutline
+    });
   }
 
-  // Datos del usuario
-  user = {
-    firstName: 'Juan',
-    lastName: 'Pérez',
-    email: 'juan.perez@email.com',
-    phone: '+1 234 567 8900',
-    joinDate: '2024-01-01',
-    isActive: true,
-    profilePhoto: 'https://via.placeholder.com/150',
-    totalEvents: 15,
-    totalCars: 2,
-    totalVotes: 112,
-    totalPhotos: 45
-  };
-
-
-
-  // Historial de actividad
-  recentActivity = [
-    {
-      id: 1,
-      type: 'event',
-      title: 'Participaste en Car Meet Downtown',
-      date: '2024-01-15',
-      icon: 'calendar'
-    },
-    {
-      id: 2,
-      type: 'vote',
-      title: 'Votaste por Honda Civic Type R',
-      date: '2024-01-14',
-      icon: 'star'
-    },
-    {
-      id: 3,
-      type: 'car',
-      title: 'Agregaste Toyota Supra MK4',
-      date: '2024-01-10',
-      icon: 'car'
-    },
-    {
-      id: 4,
-      type: 'photo',
-      title: 'Subiste 3 fotos nuevas',
-      date: '2024-01-08',
-      icon: 'camera'
-    }
-  ];
-
-  getActivityIcon(type: string): string {
-    switch (type) {
-      case 'event': return 'calendar';
-      case 'vote': return 'star';
-      case 'car': return 'car';
-      case 'photo': return 'camera';
-      default: return 'help-circle';
-    }
+  ngOnInit() {
+    this.loadUserData();
   }
 
-  getActivityColor(type: string): string {
-    switch (type) {
-      case 'event': return 'primary';
-      case 'vote': return 'warning';
-      case 'car': return 'secondary';
-      case 'photo': return 'tertiary';
-      default: return 'medium';
-    }
+  ionViewWillEnter() {
+    this.loadUserData();
   }
 
+  loadUserData() {
+    this.isLoading = true;
+    this.authService.getMe().subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.user = response.data;
+        }
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading user data', error);
+        this.isLoading = false;
+      }
+    });
+  }
 
+  async editProfile() {
+    if (!this.user) return;
+
+    const modal = await this.modalCtrl.create({
+      component: EditProfileModalComponent,
+      componentProps: {
+        user: this.user
+      }
+    });
+
+    await modal.present();
+
+    const { data, role } = await modal.onWillDismiss();
+
+    if (role === 'confirm' && data) {
+      this.user = data;
+    }
+  }
 
   logout() {
-    // Implementar lógica de logout
-    console.log('Logout clicked');
-  }
-
-  editProfile() {
-    // Implementar lógica de edición de perfil
-    console.log('Edit profile clicked');
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }

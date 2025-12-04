@@ -1,0 +1,75 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="cancel()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-buttons slot="end">
+      <ion-button (click)="save()" [disabled]="profileForm.invalid || isLoading" strong="true">
+        <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+        <span *ngIf="!isLoading">Guardar</span>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form [formGroup]="profileForm">
+    
+    <div class="avatar-section">
+      <div class="avatar-wrapper" (click)="presentPhotoOptions()">
+        <ion-avatar class="profile-avatar">
+          <img [src]="previewUrl || 'assets/icon/favicon.png'" alt="Profile Photo">
+        </ion-avatar>
+        <div class="camera-btn">
+          <ion-icon name="camera"></ion-icon>
+        </div>
+      </div>
+      <p>Toca para cambiar foto</p>
+      
+      <input 
+        id="editProfileFileInput"
+        type="file" 
+        accept="image/*" 
+        (change)="onFileSelected($event)" 
+        style="display: none;">
+      <input 
+        id="editProfileCameraInput"
+        type="file" 
+        accept="image/*" 
+        capture="environment"
+        (change)="onFileSelected($event)" 
+        style="display: none;">
+    </div>
+
+    <div class="form-section">
+      <div class="input-group">
+        <ion-item lines="full">
+          <ion-label position="stacked">Nombre</ion-label>
+          <ion-input formControlName="firstName" type="text" placeholder="Ej. Juan"></ion-input>
+        </ion-item>
+        <div class="error-message" *ngIf="getErrorMessage('firstName')">
+          {{ getErrorMessage('firstName') }}
+        </div>
+
+        <ion-item lines="full">
+          <ion-label position="stacked">Apellido</ion-label>
+          <ion-input formControlName="lastName" type="text" placeholder="Ej. Pérez"></ion-input>
+        </ion-item>
+        <div class="error-message" *ngIf="getErrorMessage('lastName')">
+          {{ getErrorMessage('lastName') }}
+        </div>
+
+        <ion-item lines="none">
+          <ion-label position="stacked">Teléfono</ion-label>
+          <ion-input formControlName="phone" type="tel" placeholder="10 dígitos"></ion-input>
+        </ion-item>
+        <div class="error-message" *ngIf="getErrorMessage('phone')">
+          {{ getErrorMessage('phone') }}
+        </div>
+      </div>
+    </div>
+
+  </form>
+</ion-content>

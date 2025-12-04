@@ -123,6 +123,44 @@ export class AuthService {
   }
 
   /**
+   * Obtiene la información del usuario actual desde el servidor
+   */
+  getMe(): Observable<ApiResponse<User>> {
+    const token = this.getToken();
+    const headers = { 'Authorization': `Bearer ${token}` };
+    return this.http.get<ApiResponse<User>>(`${this.API_URL}/auth/me`, { headers })
+      .pipe(
+        tap(response => {
+          if (response.success && response.data) {
+            // Actualizar usuario en localStorage y subject
+            localStorage.setItem('currentUser', JSON.stringify(response.data));
+            this.currentUserSubject.next(response.data);
+          }
+        }),
+        catchError(this.handleError)
+      );
+  }
+
+  /**
+   * Actualiza el perfil del usuario
+   */
+  updateProfile(data: FormData): Observable<ApiResponse<User>> {
+    const token = this.getToken();
+    const headers = { 'Authorization': `Bearer ${token}` };
+    return this.http.put<ApiResponse<User>>(`${this.API_URL}/auth/me`, data, { headers })
+      .pipe(
+        tap(response => {
+          if (response.success && response.data) {
+            // Actualizar usuario en localStorage y subject
+            localStorage.setItem('currentUser', JSON.stringify(response.data));
+            this.currentUserSubject.next(response.data);
+          }
+        }),
+        catchError(this.handleError)
+      );
+  }
+
+  /**
    * Maneja errores de la API
    */
   private handleError(error: HttpErrorResponse): Observable<never> {

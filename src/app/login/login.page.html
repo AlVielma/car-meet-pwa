@@ -3,6 +3,12 @@
     <ion-title>
       <i class="fas fa-car"></i> Car Meet - Iniciar Sesión
     </ion-title>
+    <ion-buttons slot="end" *ngIf="showInstallButton">
+      <ion-button (click)="installApp()">
+        <i class="fas fa-download" style="margin-right: 5px;"></i>
+        Instalar
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 

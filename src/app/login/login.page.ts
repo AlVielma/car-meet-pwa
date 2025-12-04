@@ -11,6 +11,8 @@ import {
   IonLabel, 
   IonInput, 
   IonButton, 
+  IonButtons,
+  IonIcon,
   IonCard, 
   IonCardContent, 
   IonCardHeader, 
@@ -21,6 +23,8 @@ import {
   ToastController
 } from '@ionic/angular/standalone';
 import { AuthService } from '../services/auth.service';
+import { PwaInstallService } from '../services/pwa-install.service';
+import { BiometricService } from '../services/biometric.service';
 import { LoginRequest, VerifyCodeRequest } from '../interfaces/auth.interface';
 
 @Component({
@@ -37,6 +41,8 @@ import { LoginRequest, VerifyCodeRequest } from '../interfaces/auth.interface';
     IonLabel, 
     IonInput, 
     IonButton, 
+    IonButtons,
+    IonIcon,
     IonCard, 
     IonCardContent, 
     IonCardHeader, 
@@ -55,10 +61,13 @@ export class LoginPage implements OnInit {
   userEmail = '';
   resendTimer = 0;
   resendInterval: any;
+  showInstallButton = false;
 
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService,
+    private pwaInstallService: PwaInstallService,
+    private biometricService: BiometricService,
     private router: Router,
     private route: ActivatedRoute,
     private alertController: AlertController,
@@ -69,6 +78,10 @@ export class LoginPage implements OnInit {
   }
 
   ngOnInit() {
+    this.pwaInstallService.showInstallPromotion$.subscribe(show => {
+      this.showInstallButton = show;
+    });
+
     if (this.authService.isAuthenticated()) {
       this.router.navigate(['/home']);
     }
@@ -149,6 +162,19 @@ export class LoginPage implements OnInit {
         
         if (response?.success) {
           await this.showSuccessToast();
+          
+          // Al hacer login explícito, marcamos como desbloqueado
+          this.biometricService.setUnlocked(true);
+          
+          // Intentar registrar biometría si está disponible y no registrada
+          const isBiometricAvailable = await this.biometricService.isAvailable();
+          if (isBiometricAvailable) {
+             // Opcional: Podríamos forzar un registro aquí silencioso o preguntar
+             // Por ahora solo navegamos, el registro se hará cuando se pida desbloquear
+             // o podríamos llamar a verifyUser() para asegurar que se registre la credencial
+             await this.biometricService.verifyUser(); 
+          }
+
           this.router.navigate(['/home']);
         }
       } catch (error: any) {
@@ -341,5 +367,18 @@ export class LoginPage implements OnInit {
     const minutes = Math.floor(this.resendTimer / 60);
     const seconds = this.resendTimer % 60;
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  async installApp() {
+    const outcome = await this.pwaInstallService.installPwa();
+    if (outcome === 'ios') {
+      const toast = await this.toastController.create({
+        message: 'Para instalar en iOS: presiona Compartir y luego "Agregar al inicio"',
+        duration: 5000,
+        position: 'bottom',
+        buttons: [{ text: 'OK', role: 'cancel' }]
+      });
+      await toast.present();
+    }
   }
 }

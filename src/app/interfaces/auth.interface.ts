@@ -11,8 +11,14 @@ export interface User {
     name: string;
     slug: string;
   };
+  profilePhoto?: string;
+  totalEvents?: number;
+  totalCars?: number;
+  totalVotes?: number;
+  totalPhotos?: number;
+  recentActivity?: any[];
 }
-
+ 
 export interface RegisterRequest {
   firstName: string;
   lastName: string;

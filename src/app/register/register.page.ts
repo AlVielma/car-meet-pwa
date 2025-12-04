@@ -20,10 +20,11 @@ import {
   AlertController,
   ToastController,
   IonIcon,
-  IonAvatar
+  IonAvatar,
+  ActionSheetController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { camera } from 'ionicons/icons';
+import { camera, image, close } from 'ionicons/icons';
 import { AuthService } from '../services/auth.service';
 import { RegisterRequest } from '../interfaces/auth.interface';
 
@@ -64,10 +65,11 @@ export class RegisterPage implements OnInit {
     private authService: AuthService,
     private router: Router,
     private alertController: AlertController,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private actionSheetController: ActionSheetController
   ) {
     this.registerForm = this.createForm();
-    addIcons({ camera });
+    addIcons({ camera, image, close });
   }
 
   ngOnInit() {}
@@ -107,6 +109,44 @@ export class RegisterPage implements OnInit {
       };
       reader.readAsDataURL(file);
     }
+  }
+
+  async presentPhotoOptions() {
+    const actionSheet = await this.actionSheetController.create({
+      header: 'Seleccionar foto de perfil',
+      buttons: [
+        {
+          text: 'Tomar Foto',
+          icon: 'camera',
+          handler: () => {
+            this.triggerCameraInput();
+          }
+        },
+        {
+          text: 'Elegir de Galería',
+          icon: 'image',
+          handler: () => {
+            this.triggerFileInput();
+          }
+        },
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          icon: 'close'
+        }
+      ]
+    });
+    await actionSheet.present();
+  }
+
+  triggerFileInput() {
+    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+    if (fileInput) fileInput.click();
+  }
+
+  triggerCameraInput() {
+    const cameraInput = document.getElementById('cameraInput') as HTMLInputElement;
+    if (cameraInput) cameraInput.click();
   }
 
   async onSubmit() {

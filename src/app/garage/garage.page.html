@@ -1,135 +1,110 @@
-<ion-header [translucent]="true">
+<ion-header class="ion-no-border">
   <ion-toolbar color="primary">
     <ion-title>
-      <i class="fas fa-car"></i> Mi Garage
+      Mi Garage
     </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <!-- Agregar nuevo auto -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>
-        <i class="fas fa-plus-circle"></i> Agregar Auto
-      </ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-button expand="block" fill="solid" color="primary">
-        <i class="fas fa-plus"></i>
-        Nuevo Auto
-      </ion-button>
-    </ion-card-content>
-  </ion-card>
+<ion-content [fullscreen]="true" class="garage-content">
+  <ion-refresher slot="fixed" (ionRefresh)="loadCars($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
 
   <!-- Mis autos -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>
-        <i class="fas fa-list"></i> Mis Autos ({{ myCars.length }})
-      </ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <div *ngFor="let car of myCars" class="car-item">
-        <ion-item>
-          <ion-icon name="car" slot="start" color="primary"></ion-icon>
-          <ion-label>
-            <h2>{{ car.brand }} {{ car.model }}</h2>
-            <p>{{ car.year }} • {{ car.color }}</p>
-            <p>{{ car.licensePlate }}</p>
-            <p>{{ car.description }}</p>
-            <div class="car-stats">
-              <ion-chip color="primary" size="small">
-                <ion-icon name="camera"></ion-icon>
-                {{ car.photos }} fotos
-              </ion-chip>
-              <ion-chip color="secondary" size="small">
-                <ion-icon name="calendar"></ion-icon>
-                {{ car.participations }} eventos
-              </ion-chip>
-              <ion-chip color="tertiary" size="small">
-                <ion-icon name="star"></ion-icon>
-                {{ car.votes }} votos
-              </ion-chip>
-            </div>
-          </ion-label>
-          <ion-badge *ngIf="car.isMain" color="warning" slot="end">
-            Principal
-          </ion-badge>
-        </ion-item>
-        
-        <div class="car-actions">
-          <ion-button fill="clear" size="small" color="primary">
-            <i class="fas fa-edit"></i>
-            Editar
-          </ion-button>
-          <ion-button fill="clear" size="small" color="secondary">
-            <i class="fas fa-camera"></i>
-            Fotos
-          </ion-button>
-          <ion-button fill="clear" size="small" color="tertiary">
-            <i class="fas fa-cog"></i>
-            Configurar
-          </ion-button>
+  <div class="section-title">
+    <h3>
+      <ion-icon name="list-outline"></ion-icon> 
+      Mis Autos ({{ myCars.length }})
+    </h3>
+  </div>
+
+  <div *ngIf="isLoading && myCars.length === 0" class="ion-text-center ion-padding">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>
+
+  <div *ngIf="!isLoading && myCars.length === 0" class="ion-text-center ion-padding empty-state">
+    <ion-icon name="car-sport-outline"></ion-icon>
+    <p>No tienes autos registrados aún.</p>
+    <ion-button fill="outline" (click)="openCarModal()">Registrar mi primer auto</ion-button>
+  </div>
+
+  <div class="cars-grid">
+    <ion-card *ngFor="let car of myCars" class="car-card">
+      <!-- Imagen del Auto (Hero Image) -->
+      <div class="car-image-container">
+        <img [src]="getCarImageUrl(car)" 
+             (error)="handleImageError($event)"
+             alt="{{ car.brand }} {{ car.model }}">
+        <div class="car-badges">
+          <ion-badge color="dark">{{ car.year }}</ion-badge>
         </div>
+        <ion-button class="edit-btn" fill="solid" color="light" shape="round" (click)="openCarModal(car)">
+          <ion-icon name="create" color="primary"></ion-icon>
+        </ion-button>
       </div>
-    </ion-card-content>
-  </ion-card>
+
+      <ion-card-header>
+        <ion-card-subtitle color="primary">{{ car.brand }}</ion-card-subtitle>
+        <ion-card-title>{{ car.model }}</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="car-details">
+          <p class="detail-row">
+            <ion-icon name="color-palette-outline"></ion-icon> 
+            <span>{{ car.color }}</span>
+          </p>
+          <p class="detail-row" *ngIf="car.licensePlate">
+            <ion-icon name="card-outline"></ion-icon> 
+            <span>{{ car.licensePlate }}</span>
+          </p>
+        </div>
+
+        <p class="description" *ngIf="car.description">
+          {{ car.description }}
+        </p>
+
+        <div class="car-stats">
+          <ion-chip color="medium" outline="true" *ngIf="car.photos">
+            <ion-icon name="camera"></ion-icon>
+            <ion-label>{{ car.photos.length }} fotos</ion-label>
+          </ion-chip>
+          <!-- Aquí podrías agregar más stats si el backend los devuelve -->
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
 
   <!-- Participaciones recientes -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>
-        <i class="fas fa-history"></i> Participaciones Recientes
-      </ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <div *ngFor="let participation of recentParticipations" class="participation-item">
-        <ion-item>
-          <ion-icon [name]="getPositionIcon(participation.position)" slot="start" [color]="getPositionColor(participation.position)"></ion-icon>
-          <ion-label>
-            <h2>{{ participation.eventName }}</h2>
-            <p>{{ participation.carName }}</p>
-            <p>{{ participation.date }}</p>
-          </ion-label>
-          <ion-badge [color]="getStatusColor(participation.status)" slot="end">
-            {{ participation.status }}
-          </ion-badge>
-        </ion-item>
-      </div>
-    </ion-card-content>
-  </ion-card>
+  <div class="section-title ion-margin-top">
+    <h3>
+      <ion-icon name="time-outline"></ion-icon> 
+      Actividad Reciente
+    </h3>
+  </div>
 
-  <!-- Estadísticas -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>
-        <i class="fas fa-chart-bar"></i> Estadísticas
-      </ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-grid>
-        <ion-row>
-          <ion-col size="4">
-            <div class="stat-item">
-              <h3>{{ myCars.length }}</h3>
-              <p>Autos</p>
-            </div>
-          </ion-col>
-          <ion-col size="4">
-            <div class="stat-item">
-              <h3>{{ getTotalParticipations() }}</h3>
-              <p>Eventos</p>
-            </div>
-          </ion-col>
-          <ion-col size="4">
-            <div class="stat-item">
-              <h3>{{ getTotalVotes() }}</h3>
-              <p>Votos</p>
-            </div>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </ion-card-content>
-  </ion-card>
+  <div class="participations-list">
+    <div *ngFor="let participation of recentParticipations" class="participation-card">
+      <div class="participation-icon" [ngClass]="'pos-' + participation.position">
+        <ion-icon [name]="getPositionIcon(participation.position)"></ion-icon>
+      </div>
+      <div class="participation-info">
+        <h4>{{ participation.eventName }}</h4>
+        <p class="car-name">{{ participation.carName }}</p>
+        <p class="date">{{ participation.date }}</p>
+      </div>
+      <div class="participation-status">
+        <ion-badge [color]="getStatusColor(participation.status)">
+          {{ participation.status }}
+        </ion-badge>
+      </div>
+    </div>
+  </div>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="openCarModal()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>
