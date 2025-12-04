@@ -21,4 +21,9 @@ export const routes: Routes = [
     loadComponent: () => import('./biometric-lock/biometric-lock.page').then( m => m.BiometricLockPage),
     canActivate: [authGuard] // Solo accesible si hay sesión iniciada
   },
+  {
+    path: 'events/:id',
+    loadComponent: () => import('./events/event-details/event-details.component').then( m => m.EventDetailsPage),
+    canActivate: [authGuard]
+  },
 ];

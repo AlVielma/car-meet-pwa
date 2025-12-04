@@ -25,6 +25,7 @@ import {
 import { AuthService } from '../services/auth.service';
 import { PwaInstallService } from '../services/pwa-install.service';
 import { BiometricService } from '../services/biometric.service';
+import { PushNotificationService } from '../services/push-notification.service';
 import { LoginRequest, VerifyCodeRequest } from '../interfaces/auth.interface';
 
 @Component({
@@ -68,6 +69,7 @@ export class LoginPage implements OnInit {
     private authService: AuthService,
     private pwaInstallService: PwaInstallService,
     private biometricService: BiometricService,
+    private pushNotificationService: PushNotificationService,
     private router: Router,
     private route: ActivatedRoute,
     private alertController: AlertController,
@@ -166,6 +168,9 @@ export class LoginPage implements OnInit {
           // Al hacer login explícito, marcamos como desbloqueado
           this.biometricService.setUnlocked(true);
           
+          // Inicializar notificaciones push (MOVIDO AL HOME)
+          // this.pushNotificationService.inicializarNotificaciones();
+
           // Intentar registrar biometría si está disponible y no registrada
           const isBiometricAvailable = await this.biometricService.isAvailable();
           if (isBiometricAvailable) {

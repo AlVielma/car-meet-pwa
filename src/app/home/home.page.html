@@ -1,65 +1,91 @@
-<ion-header [translucent]="true">
+<ion-header class="ion-no-border">
   <ion-toolbar color="primary">
     <ion-title>
-      <i class="fas fa-home"></i> Inicio
+      Explorar Eventos
     </ion-title>
+  </ion-toolbar>
+  <ion-toolbar color="primary">
+    <ion-searchbar placeholder="Buscar eventos..." class="custom-searchbar"></ion-searchbar>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <div class="welcome-container">
-    <ion-card class="welcome-card">
-      <ion-card-header>
-        <ion-card-title class="text-center">
-          <i class="fas fa-car"></i>
-          ¡Bienvenido a Car Meet!
-        </ion-card-title>
-        <ion-card-subtitle class="text-center">
-          Conecta con otros entusiastas del automóvil
-        </ion-card-subtitle>
-      </ion-card-header>
+<ion-content [fullscreen]="true" class="home-content">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="filters-container">
+    <ion-button size="small" fill="solid" color="dark" shape="round">Todos</ion-button>
+    <ion-button size="small" fill="outline" color="medium" shape="round">Esta Semana</ion-button>
+    <ion-button size="small" fill="outline" color="medium" shape="round">Cerca de mí</ion-button>
+  </div>
+
+  <div class="ion-padding-horizontal ion-margin-bottom" *ngIf="showNotificationButton">
+    <ion-button expand="block" color="secondary" (click)="activarNotificaciones()">
+      <ion-icon slot="start" name="notifications-outline"></ion-icon>
+      Activar Notificaciones
+    </ion-button>
+  </div>
+
+  <div *ngIf="isLoading && events.length === 0" class="ion-text-center ion-padding">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>
+
+  <div class="events-grid">
+    <ion-card *ngFor="let event of events" class="event-card" [routerLink]="['/events', event.id]">
+      <div class="event-image-container" [class.no-image]="!getEventImageUrl(event)">
+        <img *ngIf="getEventImageUrl(event) as imageUrl" [src]="imageUrl" (error)="handleImageError($event)" [alt]="event.name">
+        <div *ngIf="!getEventImageUrl(event)" class="placeholder-image">
+          <ion-icon name="image-outline"></ion-icon>
+        </div>
+        <div class="date-badge">
+          <span class="day">{{ formatDate(event.date).split(' ')[0] }}</span>
+          <span class="month">{{ formatDate(event.date).split(' ')[1] | uppercase }}</span>
+        </div>
+        <div class="status-badge" *ngIf="event.status !== 'ACTIVE'">
+          <ion-badge color="danger">{{ event.status }}</ion-badge>
+        </div>
+      </div>
       
       <ion-card-content>
-        <div class="welcome-content">
-          <p class="welcome-text">
-            Descubre eventos, comparte fotos de tu vehículo y conecta con otros entusiastas.
-          </p>
+        <h2 class="event-title">{{ event.name }}</h2>
+        
+        <div class="event-info">
+          <div class="info-row">
+            <ion-icon name="location-outline"></ion-icon>
+            <span>{{ event.location }}</span>
+          </div>
+          <div class="info-row">
+            <ion-icon name="time-outline"></ion-icon>
+            <span>{{ formatTime(event.startTime) }}</span>
+          </div>
         </div>
-      </ion-card-content>
-    </ion-card>
-    
-    <!-- Eventos próximos -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>
-          <i class="fas fa-calendar-check"></i> Próximos Eventos
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <div *ngFor="let event of upcomingEvents" class="event-item">
-          <ion-item>
-            <ion-icon name="calendar" slot="start" color="primary"></ion-icon>
-            <ion-label>
-              <h2>{{ event.name }}</h2>
-              <p>
-                <ion-icon name="location" size="small"></ion-icon>
-                {{ event.location }}
-              </p>
-              <p>
-                <ion-icon name="time" size="small"></ion-icon>
-                {{ event.date }} a las {{ event.time }}
-              </p>
-              <p>
-                <ion-icon name="people" size="small"></ion-icon>
-                {{ event.participants }} participantes
-              </p>
-            </ion-label>
-            <ion-badge [color]="getStatusColor(event.status)" slot="end">
-              {{ event.status }}
-            </ion-badge>
-          </ion-item>
+
+        <div class="event-footer">
+          <div class="organizer-info">
+            <ion-avatar class="organizer-avatar">
+              <img [src]="'assets/icon/favicon.png'" alt="Organizer"> 
+              <!-- TODO: Usar foto real del organizador si existe -->
+            </ion-avatar>
+            <span class="organizer-name">{{ event.organizer.firstName }}</span>
+          </div>
+          
+          <div class="participants-badge">
+            <ion-icon name="people-outline"></ion-icon>
+            <span>{{ event._count?.participants || 0 }}</span>
+          </div>
         </div>
       </ion-card-content>
     </ion-card>
   </div>
+
+  <div *ngIf="!isLoading && events.length === 0" class="empty-state">
+    <ion-icon name="calendar-outline"></ion-icon>
+    <p>No hay eventos próximos disponibles.</p>
+  </div>
+
+  <ion-infinite-scroll (ionInfinite)="loadMore($event)">
+    <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Cargando más eventos...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
 </ion-content>

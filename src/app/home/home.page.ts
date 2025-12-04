@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { 
   IonHeader, 
@@ -14,11 +14,22 @@ import {
   IonBadge,
   IonItem,
   IonLabel,
-  IonIcon
+  IonIcon,
+  IonSearchbar,
+  IonRefresher,
+  IonRefresherContent,
+  IonSpinner,
+  IonAvatar,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent
 } from '@ionic/angular/standalone';
 import { RouterModule } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { calendar, location, time, people } from 'ionicons/icons';
+import { calendar, location, time, people, search, filter, calendarOutline, locationOutline, timeOutline, peopleOutline, imageOutline, notificationsOutline } from 'ionicons/icons';
+import { EventService } from '../services/event.service';
+import { Event } from '../interfaces/event.interface';
+import { environment } from '../../environments/environment';
+import { PushNotificationService } from '../services/push-notification.service';
 
 @Component({
   selector: 'app-home',
@@ -40,43 +51,125 @@ import { calendar, location, time, people } from 'ionicons/icons';
     IonItem,
     IonLabel,
     IonIcon,
+    IonSearchbar,
+    IonRefresher,
+    IonRefresherContent,
+    IonSpinner,
+    IonAvatar,
+    IonInfiniteScroll,
+    IonInfiniteScrollContent,
     RouterModule
   ],
 })
-export class HomePage {
-  constructor() {
-    addIcons({ calendar, location, time, people });
+export class HomePage implements OnInit {
+  events: Event[] = [];
+  isLoading = false;
+  page = 1;
+  limit = 10;
+  totalPages = 0;
+  searchTerm = '';
+  showNotificationButton = false;
+
+  constructor(
+    private eventService: EventService,
+    private pushNotificationService: PushNotificationService
+  ) {
+    addIcons({ 
+      calendar, location, time, people, search, filter, 
+      'calendar-outline': calendarOutline, 
+      'location-outline': locationOutline, 
+      'time-outline': timeOutline, 
+      'people-outline': peopleOutline,
+      'image-outline': imageOutline,
+      'notifications-outline': notificationsOutline
+    });
   }
 
-  upcomingEvents = [
-    {
-      id: 1,
-      name: 'Car Meet Downtown',
-      location: 'Plaza Central',
-      date: '2024-01-15',
-      time: '18:00',
-      participants: 45,
-      status: 'ACTIVE'
-    },
-    {
-      id: 2,
-      name: 'Tuning Show 2024',
-      location: 'Centro de Convenciones',
-      date: '2024-01-20',
-      time: '10:00',
-      participants: 120,
-      status: 'ACTIVE'
-    }
-  ];
+  ngOnInit() {
+    this.loadEvents();
+    this.checkNotificationPermission();
+  }
 
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'ACTIVE': return 'success';
-      case 'CANCELLED': return 'danger';
-      case 'FINISHED': return 'medium';
-      case 'CONFIRMED': return 'success';
-      case 'PENDING': return 'warning';
-      default: return 'medium';
+  checkNotificationPermission() {
+    if ('Notification' in window) {
+      this.showNotificationButton = Notification.permission === 'default';
     }
+  }
+
+  async activarNotificaciones() {
+    await this.pushNotificationService.inicializarNotificaciones();
+    this.checkNotificationPermission();
+  }
+
+  loadEvents(event?: any, isRefresh = false) {
+    if (isRefresh) {
+      this.page = 1;
+      this.events = [];
+    }
+
+    this.isLoading = true;
+
+    this.eventService.getAllEvents(this.page, this.limit, 'ACTIVE', true).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          const newEvents = response.data.events;
+          this.totalPages = response.data.pagination.pages;
+          
+          if (isRefresh) {
+            this.events = newEvents;
+          } else {
+            this.events = [...this.events, ...newEvents];
+          }
+        }
+        this.isLoading = false;
+        if (event) event.target.complete();
+      },
+      error: (error) => {
+        console.error('Error loading events', error);
+        this.isLoading = false;
+        if (event) event.target.complete();
+      }
+    });
+  }
+
+  loadMore(event: any) {
+    if (this.page < this.totalPages) {
+      this.page++;
+      this.loadEvents(event);
+    } else {
+      event.target.disabled = true;
+    }
+  }
+
+  handleRefresh(event: any) {
+    this.loadEvents(event, true);
+  }
+
+  getEventImageUrl(event: Event): string | undefined {
+    if (event.photos && event.photos.length > 0) {
+      const photoUrl = event.photos[0].url;
+      if (photoUrl.startsWith('http')) return photoUrl;
+      
+      const baseUrl = environment.apiUrl.replace('/api', '');
+      const cleanPath = photoUrl.replace(/\\/g, '/');
+      return `${baseUrl}/${cleanPath.startsWith('/') ? cleanPath.substring(1) : cleanPath}`;
+    }
+    return undefined;
+  }
+
+  handleImageError(event: any) {
+    // Si falla la carga de la imagen, ocultamos la imagen y mostramos el placeholder
+    event.target.style.display = 'none';
+    event.target.parentElement.classList.add('no-image');
+  }
+
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+  }
+
+  formatTime(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
   }
 }

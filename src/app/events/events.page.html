@@ -1,89 +1,81 @@
-<ion-header [translucent]="true">
+<ion-header class="ion-no-border">
   <ion-toolbar color="primary">
-    <ion-title>
-      <i class="fas fa-calendar-alt"></i> Eventos
-    </ion-title>
+    <ion-title>Mis Participaciones</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
+<ion-content [fullscreen]="true" class="ion-padding-horizontal events-content">
+  <ion-refresher slot="fixed" (ionRefresh)="loadParticipations($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
 
+  <div class="loading-container" *ngIf="isLoading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando participaciones...</p>
+  </div>
+  
+  <div class="empty-state" *ngIf="!isLoading && myParticipations.length === 0">
+    <div class="icon-container">
+      <ion-icon name="calendar-outline"></ion-icon>
+    </div>
+    <h3>No tienes participaciones</h3>
+    <p>¡Únete a un evento para verlo aquí!</p>
+    <ion-button routerLink="/tabs/home" mode="ios">Explorar Eventos</ion-button>
+  </div>
 
-  <!-- Mis eventos organizados -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>
-        <i class="fas fa-crown"></i> Mis Eventos
-      </ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <div *ngFor="let event of myEvents" class="event-item">
-        <ion-item>
-          <ion-icon name="calendar" slot="start" color="secondary"></ion-icon>
-          <ion-label>
-            <h2>{{ event.name }}</h2>
-            <p>
-              <ion-icon name="location" size="small"></ion-icon>
-              {{ event.location }}
-            </p>
-            <p>
-              <ion-icon name="time" size="small"></ion-icon>
-              {{ event.date }} a las {{ event.time }}
-            </p>
-            <p>
-              <ion-icon name="people" size="small"></ion-icon>
-              {{ event.participants }} participantes
-            </p>
-          </ion-label>
-          <ion-badge [color]="getStatusColor(event.status)" slot="end">
-            {{ event.status }}
+  <div class="events-grid" *ngIf="!isLoading && myParticipations.length > 0">
+    <ion-card *ngFor="let participation of myParticipations" class="event-card animate__animated animate__fadeIn" [routerLink]="['/events', participation.event.id]">
+      <div class="event-image-container" [class.no-image]="!getEventImageUrl(participation)">
+        <img *ngIf="getEventImageUrl(participation)" [src]="getEventImageUrl(participation)" [alt]="participation.event.name">
+        <div *ngIf="!getEventImageUrl(participation)" class="placeholder-image">
+          <ion-icon name="image-outline"></ion-icon>
+        </div>
+        
+        <div class="date-badge">
+          <span class="day">{{ formatDate(participation.event.date).split(' ')[0] }}</span>
+          <span class="month">{{ formatDate(participation.event.date).split(' ')[1] | uppercase }}</span>
+        </div>
+        
+        <div class="status-badge">
+          <ion-badge [color]="getStatusColor(participation.status)">
+            {{ getStatusLabel(participation.status) }}
           </ion-badge>
-        </ion-item>
+        </div>
       </div>
       
-      <ion-button expand="block" fill="outline" color="primary" class="ion-margin-top">
-        <i class="fas fa-plus"></i>
-        Crear Nuevo Evento
-      </ion-button>
-    </ion-card-content>
-  </ion-card>
+      <ion-card-content>
+        <h2 class="event-title">{{ participation.event.name }}</h2>
+        
+        <div class="event-info">
+          <div class="info-row">
+            <ion-icon name="car-sport-outline"></ion-icon>
+            <span>{{ participation.car.brand }} {{ participation.car.model }}</span>
+          </div>
+          <div class="info-row">
+            <ion-icon name="location-outline"></ion-icon>
+            <span>{{ participation.event.location }}</span>
+          </div>
+          <div class="info-row">
+            <ion-icon name="time-outline"></ion-icon>
+            <span>{{ formatTime(participation.event.startTime) }}</span>
+          </div>
+        </div>
 
-  <!-- Mis participaciones -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>
-        <i class="fas fa-car"></i> Mis Participaciones
-      </ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <div *ngFor="let participation of myParticipations" class="participation-item">
-        <ion-item>
-          <ion-icon [name]="getStatusIcon(participation.status)" slot="start" [color]="getStatusColor(participation.status)"></ion-icon>
-          <ion-label>
-            <h2>{{ participation.eventName }}</h2>
-            <p>{{ participation.carName }}</p>
-            <p>{{ participation.date }}</p>
-          </ion-label>
-          <ion-badge [color]="getStatusColor(participation.status)" slot="end">
-            {{ participation.status }}
-          </ion-badge>
-        </ion-item>
-      </div>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Búsqueda y filtros -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>
-        <i class="fas fa-search"></i> Búsqueda
-      </ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-button expand="block" fill="outline" color="primary">
-        <i class="fas fa-filter"></i>
-        Filtros Avanzados
-      </ion-button>
-    </ion-card-content>
-  </ion-card>
+        <div class="event-footer">
+          <div class="organizer-info">
+            <ion-avatar class="organizer-avatar">
+              <img [src]="'assets/icon/favicon.png'" alt="Organizer"> 
+            </ion-avatar>
+            <span class="organizer-name">{{ participation.event.organizer.firstName }}</span>
+          </div>
+          
+          <div class="participants-badge">
+            <ion-icon name="people-outline"></ion-icon>
+            <span>{{ participation.event._count?.participants || 0 }}</span>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
 </ion-content>
+

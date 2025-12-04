@@ -17,6 +17,8 @@ import {
   IonSpinner,
   IonText
 } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { arrowBackOutline, closeOutline, camera, cameraOutline } from 'ionicons/icons';
 import { Car } from '../../interfaces/car.interface';
 
 @Component({
@@ -24,12 +26,12 @@ import { Car } from '../../interfaces/car.interface';
   template: `
     <ion-header>
       <ion-toolbar color="primary">
-        <ion-title>{{ car ? 'Editar Auto' : 'Nuevo Auto' }}</ion-title>
-        <ion-buttons slot="end">
+        <ion-buttons slot="start">
           <ion-button (click)="dismiss()">
-            <ion-icon name="close"></ion-icon>
+            <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
           </ion-button>
         </ion-buttons>
+        <ion-title>{{ car ? 'Editar Auto' : 'Nuevo Auto' }}</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -209,6 +211,7 @@ export class CarModalComponent implements OnInit {
     private modalCtrl: ModalController,
     private fb: FormBuilder
   ) {
+    addIcons({ arrowBackOutline, closeOutline, camera, cameraOutline });
     this.carForm = this.fb.group({
       brand: ['', [Validators.required, Validators.minLength(2)]],
       model: ['', [Validators.required]],

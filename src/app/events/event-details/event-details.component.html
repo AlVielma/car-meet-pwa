@@ -1,0 +1,214 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Detalles del Evento</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="event-details-content">
+  
+  <div *ngIf="isLoading" class="ion-text-center ion-padding loading-container">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+  </div>
+
+  <div *ngIf="!isLoading && error" class="ion-text-center ion-padding error-container">
+    <p>{{ error }}</p>
+    <ion-button (click)="ngOnInit()" fill="outline">Reintentar</ion-button>
+  </div>
+
+  <div *ngIf="!isLoading && event" class="details-container animate__animated animate__fadeIn">
+    
+    <!-- Hero Image Section -->
+    <div class="hero-image-container" [class.no-image]="!getEventImageUrl(event)">
+      <img *ngIf="getEventImageUrl(event) as imageUrl" [src]="imageUrl" [alt]="event.name">
+      <div *ngIf="!getEventImageUrl(event)" class="placeholder-image">
+        <ion-icon name="image-outline"></ion-icon>
+      </div>
+      <div class="status-badge" *ngIf="event.status !== 'ACTIVE'">
+        <ion-badge color="danger">{{ event.status }}</ion-badge>
+      </div>
+    </div>
+
+    <div class="content-wrapper">
+      
+      <!-- Participation Status Banner -->
+      <div class="participation-status-card animate__animated animate__fadeIn" *ngIf="participation">
+        <div class="status-header">
+          <ion-icon name="checkmark-circle" [color]="getStatusColor(participation.status)"></ion-icon>
+          <div class="status-text">
+            <span class="status-label">Estado de tu registro</span>
+            <span class="status-value" [style.color]="'var(--ion-color-' + getStatusColor(participation.status) + ')'">
+              {{ getStatusLabel(participation.status) }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="registered-car-info" *ngIf="participation.car">
+          <div class="car-icon">
+            <ion-icon name="car-sport"></ion-icon>
+          </div>
+          <div class="car-details">
+            <span class="label">Participando con:</span>
+            <span class="car-name">{{ participation.car.brand }} {{ participation.car.model }}</span>
+            <span class="car-meta">{{ participation.car.year }} • {{ participation.car.color }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Header Info -->
+      <div class="header-info">
+        <h1 class="event-title">{{ event.name }}</h1>
+        <div class="organizer-row">
+          <ion-avatar class="organizer-avatar">
+            <img src="assets/icon/favicon.png" alt="Organizer">
+          </ion-avatar>
+          <div class="organizer-text">
+            <span class="label">Organizado por</span>
+            <span class="name">{{ event.organizer.firstName }} {{ event.organizer.lastName }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Details Cards -->
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="icon-box">
+            <ion-icon name="calendar-outline"></ion-icon>
+          </div>
+          <div class="info-text">
+            <span class="label">Fecha</span>
+            <span class="value">{{ formatDate(event.date) }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="icon-box">
+            <ion-icon name="time-outline"></ion-icon>
+          </div>
+          <div class="info-text">
+            <span class="label">Hora</span>
+            <span class="value">{{ formatTime(event.startTime) }} - {{ formatTime(event.endTime || event.startTime) }}</span>
+          </div>
+        </div>
+
+        <div class="info-item full-width">
+          <div class="icon-box">
+            <ion-icon name="location-outline"></ion-icon>
+          </div>
+          <div class="info-text">
+            <span class="label">Ubicación</span>
+            <span class="value">{{ event.location }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="section description-section" *ngIf="event.description">
+        <h3>Acerca del evento</h3>
+        <p>{{ event.description }}</p>
+      </div>
+
+      <!-- Participants -->
+      <div class="section participants-section">
+        <div class="section-header">
+          <h3>Participantes</h3>
+          <ion-badge color="light">{{ event._count?.participants || 0 }}</ion-badge>
+        </div>
+        <div class="participants-preview">
+          <!-- Placeholder avatars -->
+          <div class="avatar-stack">
+            <div class="avatar-circle" *ngFor="let i of [1,2,3]">
+              <ion-icon name="people-outline"></ion-icon>
+            </div>
+            <div class="avatar-circle more" *ngIf="(event._count?.participants || 0) > 3">
+              +{{ (event._count?.participants || 0) - 3 }}
+            </div>
+          </div>
+          <p class="join-text">¡Sé parte de este evento!</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</ion-content>
+
+<ion-footer class="ion-no-border" *ngIf="!isLoading && event">
+  <ion-toolbar>
+    <div class="footer-actions">
+      <ion-button *ngIf="!participation" expand="block" class="action-button" shape="round" (click)="openParticipationModal()">
+        Asistir al Evento
+      </ion-button>
+      
+      <ion-button *ngIf="participation" expand="block" class="action-button" shape="round" color="success" fill="outline" style="opacity: 1; pointer-events: none;">
+        <ion-icon slot="start" name="checkmark-circle"></ion-icon>
+        Ya estás registrado
+      </ion-button>
+    </div>
+  </ion-toolbar>
+</ion-footer>
+
+<!-- Modal de Selección de Auto -->
+<ion-modal [isOpen]="isParticipationModalOpen" (didDismiss)="closeParticipationModal()" [initialBreakpoint]="0.5" [breakpoints]="[0, 0.5, 0.75, 1]">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Selecciona tu Auto</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeParticipationModal()">
+            <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <div class="modal-content">
+        <p class="instruction-text">Elige con qué auto participarás en este evento:</p>
+        
+        <ion-list *ngIf="myCars.length > 0">
+          <ion-radio-group [(ngModel)]="selectedCarId">
+            <ion-item *ngFor="let car of myCars" lines="none" class="car-item">
+              <ion-icon name="car-sport-outline" slot="start" color="primary"></ion-icon>
+              <ion-label>
+                <h2>{{ car.brand }} {{ car.model }}</h2>
+                <p>{{ car.year }} • {{ car.color }}</p>
+              </ion-label>
+              <ion-radio slot="end" [value]="car.id"></ion-radio>
+            </ion-item>
+          </ion-radio-group>
+        </ion-list>
+
+        <div class="empty-cars" *ngIf="myCars.length === 0">
+          <ion-icon name="car-sport-outline"></ion-icon>
+          <p>No tienes autos registrados</p>
+        </div>
+      </div>
+    </ion-content>
+
+    <ion-footer class="ion-no-border">
+      <div class="modal-actions ion-padding">
+        <ion-button expand="block" fill="outline" class="create-car-btn" (click)="openCreateCarModal()">
+          <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+          Registrar Nuevo Auto
+        </ion-button>
+        
+        <ion-button expand="block" [disabled]="!selectedCarId || isParticipating" (click)="confirmParticipation()">
+          <span *ngIf="!isParticipating">Confirmar Participación</span>
+          <ion-spinner *ngIf="isParticipating" name="crescent"></ion-spinner>
+        </ion-button>
+      </div>
+    </ion-footer>
+  </ng-template>
+</ion-modal>
+
+<ion-toast
+  [isOpen]="isToastOpen"
+  [message]="toastMessage"
+  [duration]="3000"
+  (didDismiss)="isToastOpen = false"
+  position="bottom"
+  color="dark"
+></ion-toast>

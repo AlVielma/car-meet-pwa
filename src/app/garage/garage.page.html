@@ -76,32 +76,6 @@
     </ion-card>
   </div>
 
-  <!-- Participaciones recientes -->
-  <div class="section-title ion-margin-top">
-    <h3>
-      <ion-icon name="time-outline"></ion-icon> 
-      Actividad Reciente
-    </h3>
-  </div>
-
-  <div class="participations-list">
-    <div *ngFor="let participation of recentParticipations" class="participation-card">
-      <div class="participation-icon" [ngClass]="'pos-' + participation.position">
-        <ion-icon [name]="getPositionIcon(participation.position)"></ion-icon>
-      </div>
-      <div class="participation-info">
-        <h4>{{ participation.eventName }}</h4>
-        <p class="car-name">{{ participation.carName }}</p>
-        <p class="date">{{ participation.date }}</p>
-      </div>
-      <div class="participation-status">
-        <ion-badge [color]="getStatusColor(participation.status)">
-          {{ participation.status }}
-        </ion-badge>
-      </div>
-    </div>
-  </div>
-
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
     <ion-fab-button (click)="openCarModal()">
       <ion-icon name="add"></ion-icon>
