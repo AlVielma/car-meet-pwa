@@ -5,7 +5,7 @@
     </ion-title>
   </ion-toolbar>
   <ion-toolbar color="primary">
-    <ion-searchbar placeholder="Buscar eventos..." class="custom-searchbar"></ion-searchbar>
+    <ion-searchbar placeholder="Buscar eventos..." class="custom-searchbar" (ionInput)="handleSearch($event)" [debounce]="500"></ion-searchbar>
   </ion-toolbar>
 </ion-header>
 
@@ -13,12 +13,6 @@
   <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
-
-  <div class="filters-container">
-    <ion-button size="small" fill="solid" color="dark" shape="round">Todos</ion-button>
-    <ion-button size="small" fill="outline" color="medium" shape="round">Esta Semana</ion-button>
-    <ion-button size="small" fill="outline" color="medium" shape="round">Cerca de mí</ion-button>
-  </div>
 
   <div class="ion-padding-horizontal ion-margin-bottom" *ngIf="showNotificationButton">
     <ion-button expand="block" color="secondary" (click)="activarNotificaciones()">

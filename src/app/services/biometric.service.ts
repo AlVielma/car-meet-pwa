@@ -58,6 +58,23 @@ export class BiometricService {
       const challenge = new Uint8Array(32);
       window.crypto.getRandomValues(challenge);
 
+      // Obtener datos del usuario actual del localStorage
+      const savedUserStr = localStorage.getItem('currentUser');
+      let userEmail = 'usuario@carmeet.com';
+      let userDisplayName = 'Usuario Car Meet';
+
+      if (savedUserStr) {
+        try {
+          const savedUser = JSON.parse(savedUserStr);
+          if (savedUser.email) userEmail = savedUser.email;
+          if (savedUser.firstName) {
+            userDisplayName = `${savedUser.firstName} ${savedUser.lastName || ''}`.trim();
+          }
+        } catch (e) {
+          console.warn('Error parsing currentUser for biometric registration', e);
+        }
+      }
+
       const publicKey: PublicKeyCredentialCreationOptions = {
         challenge: challenge,
         rp: {
@@ -65,8 +82,8 @@ export class BiometricService {
         },
         user: {
           id: new Uint8Array(16),
-          name: 'usuario@carmeet.com',
-          displayName: 'Usuario Car Meet'
+          name: userEmail,
+          displayName: userDisplayName
         },
         pubKeyCredParams: [{ alg: -7, type: 'public-key' }],
         authenticatorSelection: {

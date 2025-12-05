@@ -109,7 +109,7 @@ export class HomePage implements OnInit {
 
     this.isLoading = true;
 
-    this.eventService.getAllEvents(this.page, this.limit, 'ACTIVE', true).subscribe({
+    this.eventService.getAllEvents(this.page, this.limit, 'ACTIVE', true, this.searchTerm).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           const newEvents = response.data.events;
@@ -130,6 +130,11 @@ export class HomePage implements OnInit {
         if (event) event.target.complete();
       }
     });
+  }
+
+  handleSearch(event: any) {
+    this.searchTerm = event.detail.value;
+    this.loadEvents(null, true);
   }
 
   loadMore(event: any) {
@@ -158,7 +163,6 @@ export class HomePage implements OnInit {
   }
 
   handleImageError(event: any) {
-    // Si falla la carga de la imagen, ocultamos la imagen y mostramos el placeholder
     event.target.style.display = 'none';
     event.target.parentElement.classList.add('no-image');
   }

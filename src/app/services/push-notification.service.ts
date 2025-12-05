@@ -38,8 +38,7 @@ export class PushNotificationService {
   }
 
   private async mostrarToast(message: any) {
-    // Angular SW envía el payload dentro de 'notification' si viene formateado así,
-    // o directamente en el objeto si es data pura. Adaptamos según llegue.
+
     const title = message.notification?.title || message.title || 'Nueva notificación';
     const body = message.notification?.body || message.body || '';
 

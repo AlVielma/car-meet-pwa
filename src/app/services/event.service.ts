@@ -58,7 +58,8 @@ export class EventService {
     page: number = 1, 
     limit: number = 10, 
     status?: string, 
-    upcoming: boolean = true
+    upcoming: boolean = true,
+    search?: string
   ): Observable<ApiResponse<PaginatedEventsResponse>> {
     let params = new HttpParams()
       .set('page', page.toString())
@@ -70,6 +71,10 @@ export class EventService {
 
     if (upcoming) {
       params = params.set('upcoming', 'true');
+    }
+
+    if (search) {
+      params = params.set('search', search);
     }
 
     // No necesitamos header de auth para ver eventos públicos, 
