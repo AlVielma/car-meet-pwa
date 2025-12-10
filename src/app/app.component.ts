@@ -12,7 +12,7 @@ export class AppComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private pushNotificationService: PushNotificationService
-  ) {}
+  ) { }
 
   ngOnInit() {
     // if (this.authService.isAuthenticated()) {

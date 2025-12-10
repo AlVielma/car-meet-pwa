@@ -28,6 +28,10 @@ import { camera, image, close } from 'ionicons/icons';
 import { AuthService } from '../services/auth.service';
 import { RegisterRequest } from '../interfaces/auth.interface';
 
+declare global {
+  interface Window { grecaptcha: any; }
+}
+
 @Component({
   selector: 'app-register',
   templateUrl: './register.page.html',
@@ -59,6 +63,10 @@ export class RegisterPage implements OnInit {
   isLoading = false;
   selectedPhoto: File | null = null;
   photoPreview: string | null = null;
+  private recaptchaWidgetId: number | null = null;
+  private recaptchaLoaded = false;
+  // Put your site key here (updated)
+  private readonly RECAPTCHA_SITE_KEY = '6LfNlCUsAAAAAGSUWSqila-_Wmc2n0hBsy2KYiV3';
 
   constructor(
     private formBuilder: FormBuilder,
@@ -73,6 +81,101 @@ export class RegisterPage implements OnInit {
   }
 
   ngOnInit() {}
+
+  ngAfterViewInit() {
+    this.loadReCaptchaScript();
+  }
+
+  private loadReCaptchaScript() {
+    // If already present, try to render
+    if (window.grecaptcha) {
+      this.recaptchaLoaded = true;
+      this.renderReCaptcha();
+      return;
+    }
+
+    // Insert script
+    const scriptId = 'recaptcha-script';
+    if (document.getElementById(scriptId)) {
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.id = scriptId;
+    script.src = `https://www.google.com/recaptcha/api.js?render=explicit`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      this.recaptchaLoaded = true;
+      this.renderReCaptcha();
+    };
+    script.onerror = (e) => console.error('Error loading reCAPTCHA script', e);
+    document.head.appendChild(script);
+  }
+
+  private renderReCaptcha() {
+    try {
+      if (!window.grecaptcha) return;
+      // Ensure container exists
+      const container = document.getElementById('recaptcha-container');
+      if (!container) return;
+
+      // If already rendered, reset
+      try {
+        if (this.recaptchaWidgetId !== null) {
+          window.grecaptcha.reset(this.recaptchaWidgetId);
+        }
+      } catch (e) {}
+
+      // Render checkbox widget. Use grecaptcha.ready if available to ensure API is initialized.
+      const doRender = () => {
+        try {
+          if (typeof window.grecaptcha.render === 'function') {
+            this.recaptchaWidgetId = window.grecaptcha.render(container, {
+              sitekey: this.RECAPTCHA_SITE_KEY,
+              theme: 'light'
+            });
+          } else {
+            // Not yet available; throw to trigger retry below
+            throw new Error('grecaptcha.render not available');
+          }
+        } catch (err) {
+          // Retry a few times with delay
+          let attempts = 0;
+          const maxAttempts = 5;
+          const retry = () => {
+            attempts++;
+            if (attempts > maxAttempts) {
+              console.error('Failed to render reCAPTCHA after retries', err);
+              return;
+            }
+            if (window.grecaptcha && typeof window.grecaptcha.render === 'function') {
+              try {
+                this.recaptchaWidgetId = window.grecaptcha.render(container, {
+                  sitekey: this.RECAPTCHA_SITE_KEY,
+                  theme: 'light'
+                });
+              } catch (e) {
+                setTimeout(retry, 500);
+              }
+            } else {
+              setTimeout(retry, 500);
+            }
+          };
+          setTimeout(retry, 300);
+        }
+      };
+
+      if (typeof window.grecaptcha.ready === 'function') {
+        window.grecaptcha.ready(() => doRender());
+      } else {
+        // If ready isn't available, attempt immediate render (or retries inside doRender)
+        doRender();
+      }
+    } catch (e) {
+      console.error('Error rendering reCAPTCHA', e);
+    }
+  }
 
   private createForm(): FormGroup {
     return this.formBuilder.group({
@@ -154,6 +257,27 @@ export class RegisterPage implements OnInit {
       this.isLoading = true;
       
       try {
+        // Obtener token reCAPTCHA (v2 checkbox)
+        let recaptchaToken = '';
+        try {
+          if (this.recaptchaLoaded && this.recaptchaWidgetId !== null && window.grecaptcha) {
+            recaptchaToken = window.grecaptcha.getResponse(this.recaptchaWidgetId);
+          }
+        } catch (e) {
+          console.warn('Error obtaining recaptcha token', e);
+        }
+
+        if (!recaptchaToken) {
+          this.isLoading = false;
+          const toast = await this.toastController.create({
+            message: 'Por favor completa el reCAPTCHA antes de continuar.',
+            duration: 3000,
+            color: 'warning',
+            position: 'top'
+          });
+          await toast.present();
+          return;
+        }
         const formData = new FormData();
         const formValue = this.registerForm.value;
 
@@ -168,6 +292,9 @@ export class RegisterPage implements OnInit {
         if (this.selectedPhoto) {
           formData.append('photo', this.selectedPhoto);
         }
+
+        // Agregar token reCAPTCHA
+        formData.append('g-recaptcha-response', recaptchaToken);
 
         const response = await this.authService.register(formData).toPromise();
         

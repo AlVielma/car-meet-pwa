@@ -36,10 +36,13 @@ export interface LoginRequest {
 export interface VerifyCodeRequest {
   email: string;
   code: string;
+  'g-recaptcha-response'?: string;
 }
 
 export interface ResendCodeRequest {
   email: string;
+  // Optional reCAPTCHA token (frontend sends as 'g-recaptcha-response')
+  'g-recaptcha-response'?: string;
 }
 
 export interface ApiResponse<T = any> {

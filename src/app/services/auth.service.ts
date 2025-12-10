@@ -70,8 +70,12 @@ export class AuthService {
   /**
    * Reenvía el código de verificación
    */
-  resendCode(email: string): Observable<ApiResponse<VerificationCodeResponse>> {
+  resendCode(email: string, recaptchaToken?: string): Observable<ApiResponse<VerificationCodeResponse>> {
     const requestData: ResendCodeRequest = { email };
+    if (recaptchaToken) {
+      // send token using the expected key name
+      (requestData as any)['g-recaptcha-response'] = recaptchaToken;
+    }
     return this.http.post<ApiResponse<VerificationCodeResponse>>(`${this.API_URL}/auth/resend-code`, requestData)
       .pipe(
         catchError(this.handleError)

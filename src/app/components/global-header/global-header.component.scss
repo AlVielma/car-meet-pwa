@@ -1,0 +1,16 @@
+ion-toolbar {
+  ion-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    i {
+      font-size: 1.2rem;
+    }
+  }
+  
+  ion-buttons {
+    display: flex;
+    align-items: center;
+  }
+}

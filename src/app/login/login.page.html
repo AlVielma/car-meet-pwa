@@ -14,7 +14,6 @@
 
 <ion-content [fullscreen]="true" class="ion-padding">
   <div class="login-container">
-    <!-- Formulario de Login -->
     <ion-card class="login-card" *ngIf="!showVerification">
       <ion-card-header>
         <ion-card-title class="text-center">
@@ -56,6 +55,9 @@
           </ion-text>
 
           <!-- Botón de Login -->
+          <!-- reCAPTCHA v2 checkbox -->
+          <div id="recaptcha-container-login" class="recaptcha-wrapper" style="margin:12px 0"></div>
+
           <ion-button 
             expand="block" 
             type="submit" 
@@ -113,6 +115,9 @@
             <small *ngIf="code?.errors?.['required']">El código es requerido</small>
             <small *ngIf="code?.errors?.['pattern']">El código debe ser de 6 dígitos numéricos</small>
           </ion-text>
+
+          <!-- reCAPTCHA para verificación -->
+          <div id="recaptcha-container-verification" class="recaptcha-wrapper" style="margin:12px 0"></div>
 
           <!-- Botón de Verificación -->
           <ion-button 

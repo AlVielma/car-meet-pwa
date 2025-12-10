@@ -127,6 +127,9 @@
             <small *ngIf="passwordConfirm?.errors?.['passwordMismatch']">Las contraseñas no coinciden</small>
           </ion-text>
 
+          <!-- reCAPTCHA v2 checkbox -->
+          <div id="recaptcha-container" class="recaptcha-wrapper" style="margin: 12px 0;"></div>
+
           <!-- Botón de Registro -->
           <ion-button 
             expand="block" 

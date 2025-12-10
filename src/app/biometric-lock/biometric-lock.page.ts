@@ -145,6 +145,7 @@ export class BiometricLockPage implements OnInit {
 
   logout() {
     this.authService.logout();
+    this.biometricService.setUnlocked(false);
     this.router.navigate(['/login'], { replaceUrl: true });
   }
 }

@@ -33,6 +33,7 @@ import {
 import { AuthService } from '../services/auth.service';
 import { User } from '../interfaces/auth.interface';
 import { EditProfileModalComponent } from './edit-profile-modal/edit-profile-modal.component';
+import { BiometricService } from '../services/biometric.service';
 
 @Component({
   selector: 'app-profile',
@@ -69,7 +70,8 @@ export class ProfilePage implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private biometricService: BiometricService
   ) {
     addIcons({ 
       person, settings, notifications, logOut, shield, star, calendar, car, camera, helpCircle,
@@ -130,6 +132,7 @@ export class ProfilePage implements OnInit {
 
   logout() {
     this.authService.logout();
-    this.router.navigate(['/login']);
+    this.biometricService.setUnlocked(false);
+    this.router.navigate(['/login'], { replaceUrl: true });
   }
 }

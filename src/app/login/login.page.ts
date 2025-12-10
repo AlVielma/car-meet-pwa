@@ -28,6 +28,10 @@ import { BiometricService } from '../services/biometric.service';
 import { PushNotificationService } from '../services/push-notification.service';
 import { LoginRequest, VerifyCodeRequest } from '../interfaces/auth.interface';
 
+declare global {
+  interface Window { grecaptcha: any; }
+}
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
@@ -63,6 +67,11 @@ export class LoginPage implements OnInit {
   resendTimer = 0;
   resendInterval: any;
   showInstallButton = false;
+  private recaptchaWidgetIdLogin: number | null = null;
+  private recaptchaWidgetIdVerification: number | null = null;
+  private recaptchaLoaded = false;
+  private currentRecaptchaAction: 'verify' | 'resend' = 'verify';
+  private readonly RECAPTCHA_SITE_KEY = '6LfNlCUsAAAAAGSUWSqila-_Wmc2n0hBsy2KYiV3';
 
   constructor(
     private formBuilder: FormBuilder,
@@ -94,6 +103,105 @@ export class LoginPage implements OnInit {
         this.showActivationMessage(params['status'], params['message']);
       }
     });
+  }
+
+  ngAfterViewInit() {
+    this.loadReCaptchaScript();
+  }
+
+  private loadReCaptchaScript() {
+    if (window.grecaptcha) {
+      this.recaptchaLoaded = true;
+      this.renderReCaptchaAll();
+      return;
+    }
+
+    const scriptId = 'recaptcha-script';
+    if (document.getElementById(scriptId)) return;
+
+    const script = document.createElement('script');
+    script.id = scriptId;
+    script.src = `https://www.google.com/recaptcha/api.js?render=explicit`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      this.recaptchaLoaded = true;
+      this.renderReCaptchaAll();
+    };
+    script.onerror = (e) => console.error('Error loading reCAPTCHA script', e);
+    document.head.appendChild(script);
+  }
+
+  private renderReCaptchaAll() {
+    this.renderReCaptcha('recaptcha-container-login', 'login');
+    this.renderReCaptcha('recaptcha-container-verification', 'verification');
+  }
+
+  private renderReCaptcha(containerId: string, which: 'login'|'verification') {
+    try {
+      if (!window.grecaptcha) return;
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      const doRender = () => {
+        try {
+          if (typeof window.grecaptcha.render === 'function') {
+            const widgetId = window.grecaptcha.render(container, {
+              sitekey: this.RECAPTCHA_SITE_KEY,
+              theme: 'light'
+            });
+            if (which === 'login') this.recaptchaWidgetIdLogin = widgetId;
+            else if (which === 'verification') this.recaptchaWidgetIdVerification = widgetId;
+          } else {
+            throw new Error('grecaptcha.render not available');
+          }
+        } catch (err) {
+          let attempts = 0;
+          const maxAttempts = 5;
+          const retry = () => {
+            attempts++;
+            if (attempts > maxAttempts) {
+              console.error('Failed to render reCAPTCHA after retries', err);
+              return;
+            }
+            if (window.grecaptcha && typeof window.grecaptcha.render === 'function') {
+              try {
+                const widgetId = window.grecaptcha.render(container, {
+                  sitekey: this.RECAPTCHA_SITE_KEY,
+                  theme: 'light'
+                });
+                if (which === 'login') this.recaptchaWidgetIdLogin = widgetId;
+                else if (which === 'verification') this.recaptchaWidgetIdVerification = widgetId;
+              } catch (e) {
+                setTimeout(retry, 500);
+              }
+            } else {
+              setTimeout(retry, 500);
+            }
+          };
+          setTimeout(retry, 300);
+        }
+      };
+
+      if (typeof window.grecaptcha.ready === 'function') {
+        window.grecaptcha.ready(() => doRender());
+      } else {
+        doRender();
+      }
+    } catch (e) {
+      console.error('Error rendering reCAPTCHA', e);
+    }
+  }
+
+  private resetRecaptchaForAction(action: 'verify' | 'resend') {
+    if (this.recaptchaWidgetIdVerification !== null && window.grecaptcha) {
+      try {
+        window.grecaptcha.reset(this.recaptchaWidgetIdVerification);
+      } catch (e) {
+        console.warn('Error resetting recaptcha', e);
+      }
+    }
+    this.currentRecaptchaAction = action;
   }
 
   private async showActivationMessage(status: string, message: string) {
@@ -129,7 +237,31 @@ export class LoginPage implements OnInit {
     if (this.loginForm.valid) {
       this.isLoading = true;
       
+      // Obtén token reCAPTCHA antes de enviar
+      let recaptchaToken = '';
+      try {
+        if (this.recaptchaLoaded && this.recaptchaWidgetIdLogin !== null && window.grecaptcha) {
+          recaptchaToken = window.grecaptcha.getResponse(this.recaptchaWidgetIdLogin);
+        }
+      } catch (e) {
+        console.warn('Error obtaining recaptcha token', e);
+      }
+
+      if (!recaptchaToken) {
+        this.isLoading = false;
+        const toast = await this.toastController.create({
+          message: 'Por favor completa el reCAPTCHA antes de continuar.',
+          duration: 3000,
+          color: 'warning',
+          position: 'top'
+        });
+        await toast.present();
+        return;
+      }
+
       const credentials: LoginRequest = this.loginForm.value;
+      // append token to payload using expected key
+      (credentials as any)['g-recaptcha-response'] = recaptchaToken;
       
       try {
         const response = await this.authService.login(credentials).toPromise();
@@ -139,6 +271,15 @@ export class LoginPage implements OnInit {
           this.showVerification = true;
           this.startResendTimer();
           await this.showVerificationToast();
+          // Ensure reCAPTCHA for verification is rendered now that verification view is visible
+          setTimeout(() => {
+            try {
+              this.renderReCaptcha('recaptcha-container-verification', 'verification');
+              this.resetRecaptchaForAction('verify');
+            } catch (e) {
+              console.warn('Error rendering verification reCAPTCHA after showing verification view', e);
+            }
+          }, 250);
         }
       } catch (error: any) {
         await this.handleLoginError(error);
@@ -154,9 +295,46 @@ export class LoginPage implements OnInit {
     if (this.verificationForm.valid) {
       this.isLoading = true;
       
+      // Verificar que el reCAPTCHA esté en modo verify
+      if (this.currentRecaptchaAction !== 'verify') {
+        this.resetRecaptchaForAction('verify');
+        this.isLoading = false;
+        const toast = await this.toastController.create({
+          message: 'Por favor completa el reCAPTCHA antes de verificar el código.',
+          duration: 3000,
+          color: 'warning',
+          position: 'top'
+        });
+        await toast.present();
+        return;
+      }
+      
+      // Obtener token reCAPTCHA para verificación
+      let recaptchaToken = '';
+      try {
+        if (this.recaptchaLoaded && this.recaptchaWidgetIdVerification !== null && window.grecaptcha) {
+          recaptchaToken = window.grecaptcha.getResponse(this.recaptchaWidgetIdVerification);
+        }
+      } catch (e) {
+        console.warn('Error obtaining recaptcha token for verify', e);
+      }
+
+      if (!recaptchaToken) {
+        this.isLoading = false;
+        const toast = await this.toastController.create({
+          message: 'Por favor completa el reCAPTCHA antes de verificar el código.',
+          duration: 3000,
+          color: 'warning',
+          position: 'top'
+        });
+        await toast.present();
+        return;
+      }
+
       const verifyData: VerifyCodeRequest = {
         email: this.userEmail,
-        code: this.verificationForm.value.code
+        code: this.verificationForm.value.code,
+        'g-recaptcha-response': recaptchaToken
       };
       
       try {
@@ -198,7 +376,32 @@ export class LoginPage implements OnInit {
     this.isLoading = true;
     
     try {
-      const response = await this.authService.resendCode(this.userEmail).toPromise();
+      // Cambiar el reCAPTCHA a modo resend
+      this.resetRecaptchaForAction('resend');
+      
+      // Get reCAPTCHA token for resend
+      let recaptchaToken = '';
+      try {
+        if (this.recaptchaLoaded && this.recaptchaWidgetIdVerification !== null && window.grecaptcha) {
+          recaptchaToken = window.grecaptcha.getResponse(this.recaptchaWidgetIdVerification);
+        }
+      } catch (e) {
+        console.warn('Error obtaining recaptcha token for resend', e);
+      }
+
+      if (!recaptchaToken) {
+        this.isLoading = false;
+        const toast = await this.toastController.create({
+          message: 'Por favor completa el reCAPTCHA antes de reenviar el código.',
+          duration: 3000,
+          color: 'warning',
+          position: 'top'
+        });
+        await toast.present();
+        return;
+      }
+
+      const response = await this.authService.resendCode(this.userEmail, recaptchaToken).toPromise();
       
       if (response?.success) {
         this.startResendTimer();
@@ -228,6 +431,8 @@ export class LoginPage implements OnInit {
     if (this.resendInterval) {
       clearInterval(this.resendInterval);
     }
+    // Resetear el reCAPTCHA de verificación
+    this.resetRecaptchaForAction('verify');
   }
 
   private async showSuccessToast() {

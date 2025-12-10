@@ -29,14 +29,34 @@
   ],
   "dataGroups": [
     {
-      "name": "api-freshness",
+      "name": "api-performance",
       "urls": [
+        "https://api.carlosduron.online/api/**",
         "https://87bp7xx8-3000.usw3.devtunnels.ms/api/**"
       ],
       "cacheConfig": {
-        "strategy": "freshness",
+        "strategy": "performance",
         "maxSize": 100,
-        "maxAge": "1h",
+        "maxAge": "3d",
+        "timeout": "5s"
+      }
+    },
+    {
+      "name": "api-images",
+      "urls": [
+        "https://api.carlosduron.online/**/*.jpg",
+        "https://api.carlosduron.online/**/*.jpeg",
+        "https://api.carlosduron.online/**/*.png",
+        "https://api.carlosduron.online/**/*.webp",
+        "https://87bp7xx8-3000.usw3.devtunnels.ms/**/*.jpg",
+        "https://87bp7xx8-3000.usw3.devtunnels.ms/**/*.jpeg",
+        "https://87bp7xx8-3000.usw3.devtunnels.ms/**/*.png",
+        "https://87bp7xx8-3000.usw3.devtunnels.ms/**/*.webp"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 200,
+        "maxAge": "7d",
         "timeout": "5s"
       }
     }
