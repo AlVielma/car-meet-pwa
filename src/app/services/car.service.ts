@@ -35,15 +35,23 @@ export class CarService {
   }
 
   // Get cars combining server data with pending offline cars
-  async getMyCarsWithOffline(): Promise<CarWithStatus[]> {
+  async getMyCarsWithOffline(forceRefresh: boolean = false): Promise<CarWithStatus[]> {
     const cars: CarWithStatus[] = [];
 
     // Try to get cars from server if online
     if (this.networkService.isOnline) {
       try {
+        let headers = this.getHeaders();
+
+        // Add cache control headers if force refresh
+        if (forceRefresh) {
+          headers = headers.set('Cache-Control', 'no-cache');
+          headers = headers.set('Pragma', 'no-cache');
+        }
+
         const response = await this.http.get<ApiResponse<Car[]>>(
           `${this.API_URL}/cars/my-cars`,
-          { headers: this.getHeaders() }
+          { headers }
         ).toPromise();
 
         if (response?.success && response.data) {
@@ -87,7 +95,8 @@ export class CarService {
       }] : []
     }));
 
-    return [...pendingCarsMapped, ...cars];
+    // Return server cars first, then pending cars
+    return [...cars, ...pendingCarsMapped];
   }
 
   createCar(carData: CreateCarRequest): Observable<ApiResponse<Car>> {

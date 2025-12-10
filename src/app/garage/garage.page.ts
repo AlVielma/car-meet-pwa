@@ -264,7 +264,8 @@ export class GaragePage implements OnInit {
       const result = await this.carService.syncPendingCars();
       if (result.success > 0) {
         this.showToast(`${result.success} auto(s) sincronizado(s) exitosamente`, 'success');
-        await this.loadCars();
+        // Force refresh from server to get newly synced cars
+        this.myCars = await this.carService.getMyCarsWithOffline(true);
       }
       if (result.failed > 0) {
         this.showToast(`${result.failed} auto(s) no se pudieron sincronizar`, 'warning');
