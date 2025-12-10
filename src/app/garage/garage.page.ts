@@ -205,10 +205,12 @@ export class GaragePage implements OnInit {
     if (this.networkService.isOnline) {
       // Online: try to create directly
       this.carService.createCar(request).subscribe({
-        next: (response) => {
+        next: async (response) => {
           if (response.success) {
             this.showToast('Auto creado exitosamente', 'success');
-            this.loadCars();
+            // Force refresh to bypass cache and get the new car
+            this.myCars = await this.carService.getMyCarsWithOffline(true);
+            this.isLoading = false;
           }
         },
         error: (error) => {
