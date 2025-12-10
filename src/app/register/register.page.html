@@ -15,7 +15,7 @@
           Crear Cuenta
         </ion-card-title>
       </ion-card-header>
-      
+
       <ion-card-content>
         <!-- Foto de Perfil -->
         <div class="photo-upload-container">
@@ -25,18 +25,8 @@
               <ion-icon name="camera"></ion-icon>
             </div>
           </div>
-          <input 
-            id="fileInput"
-            type="file" 
-            accept="image/*" 
-            (change)="onPhotoSelected($event)" 
-            style="display: none;">
-          <input 
-            id="cameraInput"
-            type="file" 
-            accept="image/*" 
-            capture="environment"
-            (change)="onPhotoSelected($event)" 
+          <input id="fileInput" type="file" accept="image/*" (change)="onPhotoSelected($event)" style="display: none;">
+          <input id="cameraInput" type="file" accept="image/*" capture="environment" (change)="onPhotoSelected($event)"
             style="display: none;">
           <p class="photo-hint">Toca para subir una foto</p>
         </div>
@@ -45,10 +35,7 @@
           <!-- Nombre -->
           <ion-item>
             <ion-label position="stacked">Nombre *</ion-label>
-            <ion-input 
-              type="text" 
-              formControlName="firstName"
-              placeholder="Ingresa tu nombre"
+            <ion-input type="text" formControlName="firstName" placeholder="Ingresa tu nombre"
               [class.ion-invalid]="firstName?.invalid && firstName?.touched">
             </ion-input>
           </ion-item>
@@ -60,10 +47,7 @@
           <!-- Apellido -->
           <ion-item>
             <ion-label position="stacked">Apellido *</ion-label>
-            <ion-input 
-              type="text" 
-              formControlName="lastName"
-              placeholder="Ingresa tu apellido"
+            <ion-input type="text" formControlName="lastName" placeholder="Ingresa tu apellido"
               [class.ion-invalid]="lastName?.invalid && lastName?.touched">
             </ion-input>
           </ion-item>
@@ -75,10 +59,7 @@
           <!-- Email -->
           <ion-item>
             <ion-label position="stacked">Email *</ion-label>
-            <ion-input 
-              type="email" 
-              formControlName="email"
-              placeholder="tu@email.com"
+            <ion-input type="email" formControlName="email" placeholder="tu@email.com"
               [class.ion-invalid]="email?.invalid && email?.touched">
             </ion-input>
           </ion-item>
@@ -90,35 +71,36 @@
           <!-- Teléfono -->
           <ion-item>
             <ion-label position="stacked">Teléfono (opcional)</ion-label>
-            <ion-input 
-              type="tel" 
-              formControlName="phone"
-              placeholder="+1 (555) 123-4567">
+            <ion-input type="tel" formControlName="phone" placeholder="+1 (555) 123-4567">
             </ion-input>
           </ion-item>
 
           <!-- Contraseña -->
           <ion-item>
             <ion-label position="stacked">Contraseña *</ion-label>
-            <ion-input 
-              type="password" 
-              formControlName="password"
-              placeholder="Mínimo 6 caracteres"
+            <ion-input type="password" formControlName="password" placeholder="Mínimo 8 caracteres"
               [class.ion-invalid]="password?.invalid && password?.touched">
             </ion-input>
           </ion-item>
           <ion-text color="danger" *ngIf="password?.invalid && password?.touched">
             <small *ngIf="password?.errors?.['required']">La contraseña es requerida</small>
-            <small *ngIf="password?.errors?.['minlength']">La contraseña debe tener al menos 6 caracteres</small>
+            <small *ngIf="password?.errors?.['passwordStrength']">
+              La contraseña debe contener:
+              <ul style="margin: 4px 0; padding-left: 20px;">
+                <li *ngIf="!password?.errors?.['passwordStrength'].hasMinLength">Al menos 8 caracteres</li>
+                <li *ngIf="!password?.errors?.['passwordStrength'].hasUpperCase">Al menos una mayúscula</li>
+                <li *ngIf="!password?.errors?.['passwordStrength'].hasLowerCase">Al menos una minúscula</li>
+                <li *ngIf="!password?.errors?.['passwordStrength'].hasNumber">Al menos un número</li>
+                <li *ngIf="!password?.errors?.['passwordStrength'].hasSpecialChar">Al menos un carácter especial
+                  (@$!%*?&.#_-)</li>
+              </ul>
+            </small>
           </ion-text>
 
           <!-- Confirmar Contraseña -->
           <ion-item>
             <ion-label position="stacked">Confirmar Contraseña *</ion-label>
-            <ion-input 
-              type="password" 
-              formControlName="passwordConfirm"
-              placeholder="Repite tu contraseña"
+            <ion-input type="password" formControlName="passwordConfirm" placeholder="Repite tu contraseña"
               [class.ion-invalid]="passwordConfirm?.invalid && passwordConfirm?.touched">
             </ion-input>
           </ion-item>
@@ -131,10 +113,7 @@
           <div id="recaptcha-container" class="recaptcha-wrapper" style="margin: 12px 0;"></div>
 
           <!-- Botón de Registro -->
-          <ion-button 
-            expand="block" 
-            type="submit" 
-            [disabled]="registerForm.invalid || isLoading"
+          <ion-button expand="block" type="submit" [disabled]="registerForm.invalid || isLoading"
             class="register-button">
             <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
             <span *ngIf="!isLoading">
@@ -146,7 +125,7 @@
         <!-- Enlace a Login -->
         <div class="text-center login-link">
           <ion-text>
-            ¿Ya tienes una cuenta? 
+            ¿Ya tienes una cuenta?
             <a (click)="goToLogin()" class="login-link-text" style="cursor: pointer;">
               Inicia sesión aquí
             </a>

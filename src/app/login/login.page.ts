@@ -2,20 +2,20 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { 
-  IonHeader, 
-  IonToolbar, 
-  IonTitle, 
-  IonContent, 
-  IonItem, 
-  IonLabel, 
-  IonInput, 
-  IonButton, 
+import {
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonItem,
+  IonLabel,
+  IonInput,
+  IonButton,
   IonButtons,
   IonIcon,
-  IonCard, 
-  IonCardContent, 
-  IonCardHeader, 
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
   IonCardTitle,
   IonText,
   IonSpinner,
@@ -38,19 +38,19 @@ declare global {
   styleUrls: ['./login.page.scss'],
   standalone: true,
   imports: [
-    IonHeader, 
-    IonToolbar, 
-    IonTitle, 
-    IonContent, 
-    IonItem, 
-    IonLabel, 
-    IonInput, 
-    IonButton, 
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonContent,
+    IonItem,
+    IonLabel,
+    IonInput,
+    IonButton,
     IonButtons,
     IonIcon,
-    IonCard, 
-    IonCardContent, 
-    IonCardHeader, 
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
     IonCardTitle,
     IonText,
     IonSpinner,
@@ -137,7 +137,7 @@ export class LoginPage implements OnInit {
     this.renderReCaptcha('recaptcha-container-verification', 'verification');
   }
 
-  private renderReCaptcha(containerId: string, which: 'login'|'verification') {
+  private renderReCaptcha(containerId: string, which: 'login' | 'verification') {
     try {
       if (!window.grecaptcha) return;
       const container = document.getElementById(containerId);
@@ -223,8 +223,37 @@ export class LoginPage implements OnInit {
   private createLoginForm(): FormGroup {
     return this.formBuilder.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, this.passwordValidator]]
     });
+  }
+
+  private passwordValidator(control: any) {
+    const value = control.value;
+    if (!value) {
+      return null; // El required validator maneja esto
+    }
+
+    const hasMinLength = value.length >= 8;
+    const hasUpperCase = /[A-Z]/.test(value);
+    const hasLowerCase = /[a-z]/.test(value);
+    const hasNumber = /\d/.test(value);
+    const hasSpecialChar = /[@$!%*?&.#_\-]/.test(value);
+
+    const passwordValid = hasMinLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
+
+    if (!passwordValid) {
+      return {
+        passwordStrength: {
+          hasMinLength,
+          hasUpperCase,
+          hasLowerCase,
+          hasNumber,
+          hasSpecialChar
+        }
+      };
+    }
+
+    return null;
   }
 
   private createVerificationForm(): FormGroup {
@@ -236,7 +265,7 @@ export class LoginPage implements OnInit {
   async onSubmit() {
     if (this.loginForm.valid) {
       this.isLoading = true;
-      
+
       // Obtén token reCAPTCHA antes de enviar
       let recaptchaToken = '';
       try {
@@ -262,10 +291,10 @@ export class LoginPage implements OnInit {
       const credentials: LoginRequest = this.loginForm.value;
       // append token to payload using expected key
       (credentials as any)['g-recaptcha-response'] = recaptchaToken;
-      
+
       try {
         const response = await this.authService.login(credentials).toPromise();
-        
+
         if (response?.success) {
           this.userEmail = credentials.email;
           this.showVerification = true;
@@ -294,7 +323,7 @@ export class LoginPage implements OnInit {
   async onVerifyCode() {
     if (this.verificationForm.valid) {
       this.isLoading = true;
-      
+
       // Verificar que el reCAPTCHA esté en modo verify
       if (this.currentRecaptchaAction !== 'verify') {
         this.resetRecaptchaForAction('verify');
@@ -308,7 +337,7 @@ export class LoginPage implements OnInit {
         await toast.present();
         return;
       }
-      
+
       // Obtener token reCAPTCHA para verificación
       let recaptchaToken = '';
       try {
@@ -336,26 +365,26 @@ export class LoginPage implements OnInit {
         code: this.verificationForm.value.code,
         'g-recaptcha-response': recaptchaToken
       };
-      
+
       try {
         const response = await this.authService.verifyCode(verifyData).toPromise();
-        
+
         if (response?.success) {
           await this.showSuccessToast();
-          
+
           // Al hacer login explícito, marcamos como desbloqueado
           this.biometricService.setUnlocked(true);
-          
+
           // Inicializar notificaciones push (MOVIDO AL HOME)
           // this.pushNotificationService.inicializarNotificaciones();
 
           // Intentar registrar biometría si está disponible y no registrada
           const isBiometricAvailable = await this.biometricService.isAvailable();
           if (isBiometricAvailable) {
-             // Opcional: Podríamos forzar un registro aquí silencioso o preguntar
-             // Por ahora solo navegamos, el registro se hará cuando se pida desbloquear
-             // o podríamos llamar a verifyUser() para asegurar que se registre la credencial
-             await this.biometricService.verifyUser(); 
+            // Opcional: Podríamos forzar un registro aquí silencioso o preguntar
+            // Por ahora solo navegamos, el registro se hará cuando se pida desbloquear
+            // o podríamos llamar a verifyUser() para asegurar que se registre la credencial
+            await this.biometricService.verifyUser();
           }
 
           this.router.navigate(['/home']);
@@ -372,13 +401,13 @@ export class LoginPage implements OnInit {
 
   async resendCode() {
     if (this.resendTimer > 0) return;
-    
+
     this.isLoading = true;
-    
+
     try {
       // Cambiar el reCAPTCHA a modo resend
       this.resetRecaptchaForAction('resend');
-      
+
       // Get reCAPTCHA token for resend
       let recaptchaToken = '';
       try {
@@ -402,7 +431,7 @@ export class LoginPage implements OnInit {
       }
 
       const response = await this.authService.resendCode(this.userEmail, recaptchaToken).toPromise();
-      
+
       if (response?.success) {
         this.startResendTimer();
         await this.showResendSuccessToast();
@@ -467,9 +496,9 @@ export class LoginPage implements OnInit {
 
   private async handleLoginError(error: any) {
     console.error('Error completo en login:', error); // Para debug
-    
+
     let message = 'Ha ocurrido un error al iniciar sesión';
-    
+
     // Verificar si hay errores de validación
     if (error.error && error.error.errors && error.error.errors.length > 0) {
       const validationErrors = error.error.errors;
@@ -477,7 +506,7 @@ export class LoginPage implements OnInit {
       validationErrors.forEach((err: any) => {
         message += `• ${err.msg}\n`;
       });
-    } 
+    }
     // Verificar si hay un mensaje específico del servidor
     else if (error.error && error.error.message) {
       message = error.error.message;
@@ -507,9 +536,9 @@ export class LoginPage implements OnInit {
 
   private async handleVerificationError(error: any) {
     console.error('Error completo en verificación:', error);
-    
+
     let message = 'Ha ocurrido un error al verificar el código';
-    
+
     if (error.error && error.error.message) {
       message = error.error.message;
     } else if (error.error && error.error.errors && error.error.errors.length > 0) {
@@ -531,9 +560,9 @@ export class LoginPage implements OnInit {
 
   private async handleResendError(error: any) {
     console.error('Error completo en reenvío:', error);
-    
+
     let message = 'Ha ocurrido un error al reenviar el código';
-    
+
     if (error.error && error.error.message) {
       message = error.error.message;
     } else if (error.error && error.error.errors && error.error.errors.length > 0) {

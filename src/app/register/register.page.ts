@@ -2,18 +2,18 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { 
-  IonHeader, 
-  IonToolbar, 
-  IonTitle, 
-  IonContent, 
-  IonItem, 
-  IonLabel, 
-  IonInput, 
-  IonButton, 
-  IonCard, 
-  IonCardContent, 
-  IonCardHeader, 
+import {
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonItem,
+  IonLabel,
+  IonInput,
+  IonButton,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
   IonCardTitle,
   IonText,
   IonSpinner,
@@ -38,17 +38,17 @@ declare global {
   styleUrls: ['./register.page.scss'],
   standalone: true,
   imports: [
-    IonHeader, 
-    IonToolbar, 
-    IonTitle, 
-    IonContent, 
-    IonItem, 
-    IonLabel, 
-    IonInput, 
-    IonButton, 
-    IonCard, 
-    IonCardContent, 
-    IonCardHeader, 
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonContent,
+    IonItem,
+    IonLabel,
+    IonInput,
+    IonButton,
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
     IonCardTitle,
     IonText,
     IonSpinner,
@@ -80,7 +80,7 @@ export class RegisterPage implements OnInit {
     addIcons({ camera, image, close });
   }
 
-  ngOnInit() {}
+  ngOnInit() { }
 
   ngAfterViewInit() {
     this.loadReCaptchaScript();
@@ -125,7 +125,7 @@ export class RegisterPage implements OnInit {
         if (this.recaptchaWidgetId !== null) {
           window.grecaptcha.reset(this.recaptchaWidgetId);
         }
-      } catch (e) {}
+      } catch (e) { }
 
       // Render checkbox widget. Use grecaptcha.ready if available to ensure API is initialized.
       const doRender = () => {
@@ -183,20 +183,49 @@ export class RegisterPage implements OnInit {
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
       phone: [''],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, this.passwordValidator]],
       passwordConfirm: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
+  }
+
+  private passwordValidator(control: any) {
+    const value = control.value;
+    if (!value) {
+      return null; // El required validator maneja esto
+    }
+
+    const hasMinLength = value.length >= 8;
+    const hasUpperCase = /[A-Z]/.test(value);
+    const hasLowerCase = /[a-z]/.test(value);
+    const hasNumber = /\d/.test(value);
+    const hasSpecialChar = /[@$!%*?&.#_\-]/.test(value);
+
+    const passwordValid = hasMinLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
+
+    if (!passwordValid) {
+      return {
+        passwordStrength: {
+          hasMinLength,
+          hasUpperCase,
+          hasLowerCase,
+          hasNumber,
+          hasSpecialChar
+        }
+      };
+    }
+
+    return null;
   }
 
   private passwordMatchValidator(form: FormGroup) {
     const password = form.get('password');
     const passwordConfirm = form.get('passwordConfirm');
-    
+
     if (password && passwordConfirm && password.value !== passwordConfirm.value) {
       passwordConfirm.setErrors({ passwordMismatch: true });
       return { passwordMismatch: true };
     }
-    
+
     return null;
   }
 
@@ -204,7 +233,7 @@ export class RegisterPage implements OnInit {
     const file = event.target.files[0];
     if (file) {
       this.selectedPhoto = file;
-      
+
       // Crear preview
       const reader = new FileReader();
       reader.onload = () => {
@@ -255,7 +284,7 @@ export class RegisterPage implements OnInit {
   async onSubmit() {
     if (this.registerForm.valid) {
       this.isLoading = true;
-      
+
       try {
         // Obtener token reCAPTCHA (v2 checkbox)
         let recaptchaToken = '';
@@ -297,7 +326,7 @@ export class RegisterPage implements OnInit {
         formData.append('g-recaptcha-response', recaptchaToken);
 
         const response = await this.authService.register(formData).toPromise();
-        
+
         if (response?.success) {
           await this.showSuccessAlert();
           this.router.navigate(['/login']);
@@ -323,16 +352,16 @@ export class RegisterPage implements OnInit {
 
   private async handleRegistrationError(error: any) {
     console.error('Error completo:', error);
-    
+
     let message = 'Ha ocurrido un error al registrar tu cuenta';
-    
+
     if (error.error && error.error.errors && error.error.errors.length > 0) {
       const validationErrors = error.error.errors;
       message = 'Por favor, corrige los siguientes errores:\n\n';
       validationErrors.forEach((err: any) => {
         message += `• ${err.msg}\n`;
       });
-    } 
+    }
     else if (error.error && error.error.message) {
       message = error.error.message;
     }

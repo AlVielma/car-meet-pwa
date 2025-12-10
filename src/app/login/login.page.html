@@ -21,16 +21,13 @@
           Iniciar Sesión
         </ion-card-title>
       </ion-card-header>
-      
+
       <ion-card-content>
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
           <!-- Email -->
           <ion-item>
             <ion-label position="stacked">Email *</ion-label>
-            <ion-input 
-              type="email" 
-              formControlName="email"
-              placeholder="tu@email.com"
+            <ion-input type="email" formControlName="email" placeholder="tu@email.com"
               [class.ion-invalid]="email?.invalid && email?.touched">
             </ion-input>
           </ion-item>
@@ -42,27 +39,30 @@
           <!-- Contraseña -->
           <ion-item>
             <ion-label position="stacked">Contraseña *</ion-label>
-            <ion-input 
-              type="password" 
-              formControlName="password"
-              placeholder="Tu contraseña"
+            <ion-input type="password" formControlName="password" placeholder="Tu contraseña"
               [class.ion-invalid]="password?.invalid && password?.touched">
             </ion-input>
           </ion-item>
           <ion-text color="danger" *ngIf="password?.invalid && password?.touched">
             <small *ngIf="password?.errors?.['required']">La contraseña es requerida</small>
-            <small *ngIf="password?.errors?.['minlength']">La contraseña debe tener al menos 6 caracteres</small>
+            <small *ngIf="password?.errors?.['passwordStrength']">
+              La contraseña debe contener:
+              <ul style="margin: 4px 0; padding-left: 20px;">
+                <li *ngIf="!password?.errors?.['passwordStrength'].hasMinLength">Al menos 8 caracteres</li>
+                <li *ngIf="!password?.errors?.['passwordStrength'].hasUpperCase">Al menos una mayúscula</li>
+                <li *ngIf="!password?.errors?.['passwordStrength'].hasLowerCase">Al menos una minúscula</li>
+                <li *ngIf="!password?.errors?.['passwordStrength'].hasNumber">Al menos un número</li>
+                <li *ngIf="!password?.errors?.['passwordStrength'].hasSpecialChar">Al menos un carácter especial
+                  (@$!%*?&.#_-)</li>
+              </ul>
+            </small>
           </ion-text>
 
           <!-- Botón de Login -->
           <!-- reCAPTCHA v2 checkbox -->
           <div id="recaptcha-container-login" class="recaptcha-wrapper" style="margin:12px 0"></div>
 
-          <ion-button 
-            expand="block" 
-            type="submit" 
-            [disabled]="loginForm.invalid || isLoading"
-            class="login-button">
+          <ion-button expand="block" type="submit" [disabled]="loginForm.invalid || isLoading" class="login-button">
             <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
             <span *ngIf="!isLoading">
               <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
@@ -73,7 +73,7 @@
         <!-- Enlace a Registro -->
         <div class="text-center register-link">
           <ion-text>
-            ¿No tienes una cuenta? 
+            ¿No tienes una cuenta?
             <a (click)="goToRegister()" class="register-link-text" style="cursor: pointer;">
               Regístrate aquí
             </a>
@@ -90,7 +90,7 @@
           Verificación de 2 Pasos
         </ion-card-title>
       </ion-card-header>
-      
+
       <ion-card-content>
         <div class="verification-info">
           <ion-text color="medium">
@@ -103,11 +103,7 @@
           <!-- Código de Verificación -->
           <ion-item>
             <ion-label position="stacked">Código de Verificación *</ion-label>
-            <ion-input 
-              type="text" 
-              formControlName="code"
-              placeholder="123456"
-              maxlength="6"
+            <ion-input type="text" formControlName="code" placeholder="123456" maxlength="6"
               [class.ion-invalid]="code?.invalid && code?.touched">
             </ion-input>
           </ion-item>
@@ -120,10 +116,7 @@
           <div id="recaptcha-container-verification" class="recaptcha-wrapper" style="margin:12px 0"></div>
 
           <!-- Botón de Verificación -->
-          <ion-button 
-            expand="block" 
-            type="submit" 
-            [disabled]="verificationForm.invalid || isLoading"
+          <ion-button expand="block" type="submit" [disabled]="verificationForm.invalid || isLoading"
             class="login-button">
             <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
             <span *ngIf="!isLoading">
@@ -134,11 +127,7 @@
 
         <!-- Botón de Reenvío -->
         <div class="resend-section">
-          <ion-button 
-            expand="block" 
-            fill="outline" 
-            [disabled]="resendTimer > 0 || isLoading"
-            (click)="resendCode()"
+          <ion-button expand="block" fill="outline" [disabled]="resendTimer > 0 || isLoading" (click)="resendCode()"
             class="resend-button">
             <i class="fas fa-redo"></i>
             <span *ngIf="resendTimer === 0">Reenviar Código</span>
