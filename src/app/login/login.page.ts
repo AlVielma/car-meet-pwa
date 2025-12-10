@@ -70,7 +70,7 @@ export class LoginPage implements OnInit {
   private recaptchaWidgetIdLogin: number | null = null;
   private recaptchaWidgetIdVerification: number | null = null;
   private recaptchaLoaded = false;
-  private currentRecaptchaAction: 'verify' | 'resend' = 'verify';
+
   private readonly RECAPTCHA_SITE_KEY = '6LfNlCUsAAAAAGSUWSqila-_Wmc2n0hBsy2KYiV3';
 
   constructor(
@@ -201,7 +201,6 @@ export class LoginPage implements OnInit {
         console.warn('Error resetting recaptcha', e);
       }
     }
-    this.currentRecaptchaAction = action;
   }
 
   private async showActivationMessage(status: string, message: string) {
@@ -324,19 +323,7 @@ export class LoginPage implements OnInit {
     if (this.verificationForm.valid) {
       this.isLoading = true;
 
-      // Verificar que el reCAPTCHA esté en modo verify
-      if (this.currentRecaptchaAction !== 'verify') {
-        this.resetRecaptchaForAction('verify');
-        this.isLoading = false;
-        const toast = await this.toastController.create({
-          message: 'Por favor completa el reCAPTCHA antes de verificar el código.',
-          duration: 3000,
-          color: 'warning',
-          position: 'top'
-        });
-        await toast.present();
-        return;
-      }
+
 
       // Obtener token reCAPTCHA para verificación
       let recaptchaToken = '';
@@ -405,8 +392,7 @@ export class LoginPage implements OnInit {
     this.isLoading = true;
 
     try {
-      // Cambiar el reCAPTCHA a modo resend
-      this.resetRecaptchaForAction('resend');
+
 
       // Get reCAPTCHA token for resend
       let recaptchaToken = '';
@@ -433,6 +419,8 @@ export class LoginPage implements OnInit {
       const response = await this.authService.resendCode(this.userEmail, recaptchaToken).toPromise();
 
       if (response?.success) {
+        // Resetear reCAPTCHA DESPUÉS de enviar exitosamente  
+        this.resetRecaptchaForAction('verify');
         this.startResendTimer();
         await this.showResendSuccessToast();
       }
