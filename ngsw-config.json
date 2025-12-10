@@ -54,9 +54,9 @@
         "https://87bp7xx8-3000.usw3.devtunnels.ms/**/*.webp"
       ],
       "cacheConfig": {
-        "strategy": "performance",
+        "strategy": "freshness",
         "maxSize": 200,
-        "maxAge": "7d",
+        "maxAge": "30d",
         "timeout": "5s"
       }
     }

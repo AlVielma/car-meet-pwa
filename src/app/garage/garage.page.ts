@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { 
-  IonHeader, 
-  IonToolbar, 
-  IonTitle, 
-  IonContent, 
-  IonCard, 
-  IonCardContent, 
-  IonCardHeader, 
-  IonCardTitle, 
+import {
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonCardTitle,
   IonCardSubtitle,
   IonButton,
   IonItem,
@@ -27,13 +27,16 @@ import {
   IonFabButton
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { 
-  car, add, camera, settings, calendar, trophy, star, create, trash, close, 
-  carSportOutline, colorPaletteOutline, cardOutline, addCircleOutline, listOutline, timeOutline 
+import {
+  car, add, camera, settings, calendar, trophy, star, create, trash, close,
+  carSportOutline, colorPaletteOutline, cardOutline, addCircleOutline, listOutline, timeOutline,
+  cloudUploadOutline, alertCircle, refresh
 } from 'ionicons/icons';
 import { CarService } from '../services/car.service';
-import { Car, CreateCarRequest, UpdateCarRequest } from '../interfaces/car.interface';
+import { Car, CreateCarRequest, UpdateCarRequest, CarWithStatus } from '../interfaces/car.interface';
 import { CarModalComponent } from './car-modal/car-modal.component';
+import { NetworkService } from '../services/network.service';
+import { Subscription } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -42,14 +45,14 @@ import { environment } from '../../environments/environment';
   styleUrls: ['garage.page.scss'],
   imports: [
     CommonModule,
-    IonHeader, 
-    IonToolbar, 
-    IonTitle, 
-    IonContent, 
-    IonCard, 
-    IonCardContent, 
-    IonCardHeader, 
-    IonCardTitle, 
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonContent,
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
+    IonCardTitle,
     IonCardSubtitle,
     IonButton,
     IonItem,
@@ -66,7 +69,9 @@ import { environment } from '../../environments/environment';
   ],
 })
 export class GaragePage implements OnInit {
-  myCars: Car[] = [];
+  myCars: CarWithStatus[] = [];
+  isOnline = true;
+  private networkSubscription?: Subscription;
   isLoading = false;
 
   // Datos de ejemplo para participaciones (se mantendrán estáticos por ahora)
@@ -85,60 +90,75 @@ export class GaragePage implements OnInit {
     private carService: CarService,
     private modalCtrl: ModalController,
     private toastCtrl: ToastController,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private networkService: NetworkService
   ) {
-    addIcons({ 
-      car, add, camera, settings, calendar, trophy, star, create, trash, close, 
-      'car-sport-outline': carSportOutline, 
-      'color-palette-outline': colorPaletteOutline, 
+    addIcons({
+      car, add, camera, settings, calendar, trophy, star, create, trash, close,
+      'car-sport-outline': carSportOutline,
+      'color-palette-outline': colorPaletteOutline,
       'card-outline': cardOutline,
       'add-circle-outline': addCircleOutline,
       'list-outline': listOutline,
-      'time-outline': timeOutline
+      'time-outline': timeOutline,
+      'cloud-upload-outline': cloudUploadOutline,
+      'alert-circle': alertCircle,
+      'refresh': refresh
     });
   }
 
   ngOnInit() {
+    this.isOnline = this.networkService.isOnline;
     this.loadCars();
-  }
 
-  loadCars(event?: any) {
-    this.isLoading = true;
-    this.carService.getMyCars().subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.myCars = response.data;
-        }
-        this.isLoading = false;
-        if (event) event.target.complete();
-      },
-      error: (error) => {
-        console.error('Error loading cars', error);
-        this.showToast('Error al cargar los autos', 'danger');
-        this.isLoading = false;
-        if (event) event.target.complete();
+    // Listen to network status changes for auto-sync
+    this.networkSubscription = this.networkService.isOnline$.subscribe(async (online) => {
+      this.isOnline = online;
+      if (online) {
+        console.log('Connection restored, syncing pending cars...');
+        await this.syncPendingCars();
       }
     });
+  }
+
+  ngOnDestroy() {
+    if (this.networkSubscription) {
+      this.networkSubscription.unsubscribe();
+    }
+  }
+
+  async loadCars(event?: any) {
+    this.isLoading = true;
+    try {
+      this.myCars = await this.carService.getMyCarsWithOffline();
+      this.isLoading = false;
+      if (event) event.target.complete();
+    } catch (error) {
+      console.error('Error loading cars', error);
+      this.showToast('Error al cargar los autos', 'danger');
+      this.isLoading = false;
+      if (event) event.target.complete();
+    }
   }
 
   getCarImageUrl(car: Car): string {
     if (!car.photos || car.photos.length === 0) {
       return 'assets/img/car-placeholder.png';
     }
-    
+
     const photoUrl = car.photos[0].url;
-    
+
     if (photoUrl.startsWith('http')) {
       return photoUrl;
     }
-    
+
     // Si la URL viene del backend como ruta relativa (ej: uploads/...)
     // Construimos la URL completa usando la base del API
     const baseUrl = environment.apiUrl.replace('/api', '');
     // Aseguramos que no haya doble slash
     const cleanPath = photoUrl.replace(/\\/g, '/');
     const finalUrl = `${baseUrl}/${cleanPath.startsWith('/') ? cleanPath.substring(1) : cleanPath}`;
-    
+
     return finalUrl;
   }
 
@@ -168,7 +188,7 @@ export class GaragePage implements OnInit {
     }
   }
 
-  createCar(data: any) {
+  async createCar(data: any) {
     this.isLoading = true;
     const request: CreateCarRequest = {
       brand: data.brand,
@@ -181,18 +201,34 @@ export class GaragePage implements OnInit {
       photo: data.photo
     };
 
-    this.carService.createCar(request).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.showToast('Auto creado exitosamente', 'success');
-          this.loadCars();
+    // Check if online
+    if (this.networkService.isOnline) {
+      // Online: try to create directly
+      this.carService.createCar(request).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.showToast('Auto creado exitosamente', 'success');
+            this.loadCars();
+          }
+        },
+        error: (error) => {
+          this.handleError(error);
+          this.isLoading = false;
         }
-      },
-      error: (error) => {
-        this.handleError(error);
+      });
+    } else {
+      // Offline: save to IndexedDB
+      try {
+        await this.carService.createCarOffline(request);
+        this.showToast('Auto creado correctamente. Se sincronizará cuando vuelva la conexión.', 'success');
+        await this.loadCars();
+        this.isLoading = false;
+      } catch (error) {
+        console.error('Error creating car offline:', error);
+        this.showToast('Error al crear el auto offline', 'danger');
         this.isLoading = false;
       }
-    });
+    }
   }
 
   updateCar(id: number, data: any) {
@@ -223,6 +259,40 @@ export class GaragePage implements OnInit {
     });
   }
 
+  async syncPendingCars() {
+    try {
+      const result = await this.carService.syncPendingCars();
+      if (result.success > 0) {
+        this.showToast(`${result.success} auto(s) sincronizado(s) exitosamente`, 'success');
+        await this.loadCars();
+      }
+      if (result.failed > 0) {
+        this.showToast(`${result.failed} auto(s) no se pudieron sincronizar`, 'warning');
+      }
+    } catch (error) {
+      console.error('Error syncing pending cars:', error);
+    }
+  }
+
+  async retrySyncCar(car: CarWithStatus) {
+    if (!car.tempId) return;
+
+    this.isLoading = true;
+    try {
+      const success = await this.carService.retrySyncCar(car.tempId);
+      if (success) {
+        this.showToast('Auto sincronizado exitosamente', 'success');
+        await this.loadCars();
+      } else {
+        this.showToast('No se pudo sincronizar el auto. Intenta nuevamente más tarde.', 'danger');
+      }
+    } catch (error) {
+      this.showToast('Error al sincronizar el auto', 'danger');
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
   private async handleError(error: any) {
     let message = 'Ha ocurrido un error';
     if (error.error && error.error.errors && Array.isArray(error.error.errors)) {
@@ -230,7 +300,7 @@ export class GaragePage implements OnInit {
     } else if (error.error && error.error.message) {
       message = error.error.message;
     }
-    
+
     await this.showToast(message, 'danger');
   }
 

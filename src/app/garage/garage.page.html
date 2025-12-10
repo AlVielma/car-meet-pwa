@@ -14,7 +14,7 @@
   <!-- Mis autos -->
   <div class="section-title">
     <h3>
-      <ion-icon name="list-outline"></ion-icon> 
+      <ion-icon name="list-outline"></ion-icon>
       Mis Autos ({{ myCars.length }})
     </h3>
   </div>
@@ -33,15 +33,27 @@
     <ion-card *ngFor="let car of myCars" class="car-card">
       <!-- Imagen del Auto (Hero Image) -->
       <div class="car-image-container">
-        <img [src]="getCarImageUrl(car)" 
-             (error)="handleImageError($event)"
-             alt="{{ car.brand }} {{ car.model }}">
+        <img [src]="getCarImageUrl(car)" (error)="handleImageError($event)" alt="{{ car.brand }} {{ car.model }}">
         <div class="car-badges">
           <ion-badge color="dark">{{ car.year }}</ion-badge>
+          <ion-badge *ngIf="car.isPending" color="warning">
+            <ion-icon name="cloud-upload-outline"></ion-icon>
+            Pendiente
+          </ion-badge>
         </div>
         <ion-button class="edit-btn" fill="solid" color="light" shape="round" (click)="openCarModal(car)">
           <ion-icon name="create" color="primary"></ion-icon>
         </ion-button>
+
+        <!-- Sync Error Overlay -->
+        <div *ngIf="car.syncError" class="sync-error-overlay">
+          <ion-icon name="alert-circle" color="danger"></ion-icon>
+          <p>Error al sincronizar</p>
+          <ion-button size="small" fill="solid" color="primary" (click)="retrySyncCar(car)">
+            <ion-icon name="refresh" slot="start"></ion-icon>
+            Reintentar
+          </ion-button>
+        </div>
       </div>
 
       <ion-card-header>
@@ -52,11 +64,11 @@
       <ion-card-content>
         <div class="car-details">
           <p class="detail-row">
-            <ion-icon name="color-palette-outline"></ion-icon> 
+            <ion-icon name="color-palette-outline"></ion-icon>
             <span>{{ car.color }}</span>
           </p>
           <p class="detail-row" *ngIf="car.licensePlate">
-            <ion-icon name="card-outline"></ion-icon> 
+            <ion-icon name="card-outline"></ion-icon>
             <span>{{ car.licensePlate }}</span>
           </p>
         </div>
