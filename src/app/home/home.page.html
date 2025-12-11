@@ -1,11 +1,12 @@
 <ion-header class="ion-no-border">
   <ion-toolbar color="primary">
     <ion-title>
-      Explorar Eventos
+      Explorar Eventos 2
     </ion-title>
   </ion-toolbar>
   <ion-toolbar color="primary">
-    <ion-searchbar placeholder="Buscar eventos..." class="custom-searchbar" (ionInput)="handleSearch($event)" [debounce]="500"></ion-searchbar>
+    <ion-searchbar placeholder="Buscar eventos..." class="custom-searchbar" (ionInput)="handleSearch($event)"
+      [debounce]="500"></ion-searchbar>
   </ion-toolbar>
 </ion-header>
 
@@ -28,7 +29,8 @@
   <div class="events-grid">
     <ion-card *ngFor="let event of events" class="event-card" [routerLink]="['/events', event.id]">
       <div class="event-image-container" [class.no-image]="!getEventImageUrl(event)">
-        <img *ngIf="getEventImageUrl(event) as imageUrl" [src]="imageUrl" (error)="handleImageError($event)" [alt]="event.name">
+        <img *ngIf="getEventImageUrl(event) as imageUrl" [src]="imageUrl" (error)="handleImageError($event)"
+          [alt]="event.name">
         <div *ngIf="!getEventImageUrl(event)" class="placeholder-image">
           <ion-icon name="image-outline"></ion-icon>
         </div>
@@ -40,10 +42,10 @@
           <ion-badge color="danger">{{ event.status }}</ion-badge>
         </div>
       </div>
-      
+
       <ion-card-content>
         <h2 class="event-title">{{ event.name }}</h2>
-        
+
         <div class="event-info">
           <div class="info-row">
             <ion-icon name="location-outline"></ion-icon>
@@ -58,12 +60,12 @@
         <div class="event-footer">
           <div class="organizer-info">
             <ion-avatar class="organizer-avatar">
-              <img [src]="'assets/icon/favicon.png'" alt="Organizer"> 
+              <img [src]="'assets/icon/favicon.png'" alt="Organizer">
               <!-- TODO: Usar foto real del organizador si existe -->
             </ion-avatar>
             <span class="organizer-name">{{ event.organizer.firstName }}</span>
           </div>
-          
+
           <div class="participants-badge">
             <ion-icon name="people-outline"></ion-icon>
             <span>{{ event._count?.participants || 0 }}</span>
