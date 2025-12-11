@@ -14,7 +14,6 @@ export class AuthService {
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    // Verificar si hay un usuario guardado en localStorage
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
       this.currentUserSubject.next(JSON.parse(savedUser));
@@ -121,7 +120,7 @@ export class AuthService {
   isTokenExpired(): boolean {
     const expiry = localStorage.getItem('tokenExpiry');
     if (!expiry) return true;
-    
+
     const expiryTime = parseInt(expiry);
     return Date.now() >= expiryTime;
   }
@@ -169,7 +168,7 @@ export class AuthService {
    */
   private handleError(error: HttpErrorResponse): Observable<never> {
     console.error('Error en AuthService:', error); // Para debug
-    
+
     // Mantener la estructura completa del error para que el componente pueda acceder a ella
     return throwError(() => error);
   }
